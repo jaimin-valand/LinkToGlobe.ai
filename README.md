@@ -47,12 +47,15 @@ npm install
 cp .env.example .env
 ```
 
-**Get a database** — either:
+**Get a database** — any one of:
 
 - **Docker** (local): `docker compose up -d` — starts Postgres matching the
-  default `DATABASE_URL` in `.env.example`.
+  default `DATABASE_URL`.
 - **Hosted**: create a free Postgres (e.g. Neon, Supabase) and paste its
   connection string into `.env` as `DATABASE_URL`.
+- **No Docker, no install** (Windows/macOS/Linux): download the portable
+  PostgreSQL binaries once (see `scripts/localdb.mjs` for the URL) into
+  `~/.linktoglobe/pgsql`, then `npm run db:up` / `npm run db:down`.
 
 **Then set up the schema and a dev account:**
 
@@ -88,6 +91,7 @@ never applied without a click.
 | `npm run db:seed`                         | Seed the dev account        |
 | `npm run db:studio`                       | Prisma Studio (browse data) |
 | `npm run db:reset`                        | Drop, re-migrate, re-seed   |
+| `npm run db:up` / `db:down`               | Portable local Postgres     |
 
 ## Documentation
 

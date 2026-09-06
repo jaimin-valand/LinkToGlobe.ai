@@ -34,6 +34,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   time-to-approve, recent activity. No fabricated performance metrics.
 - **Audit**: every lifecycle action is written to an append-only `ActivityLog`.
 - Env schema now requires `DATABASE_URL` and `AUTH_SECRET`; adds `AI_*` config.
+- `scripts/localdb.mjs` + `npm run db:up` / `db:down` to run a portable local
+  PostgreSQL with no Docker and no installer (dev convenience).
 - Tests: quality engine, content state machine, password hashing, session
   tokens (32 unit tests total).
 

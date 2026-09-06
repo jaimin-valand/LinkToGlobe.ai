@@ -24,6 +24,8 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
+    "db:up": "node scripts/localdb.mjs start",
+    "db:down": "node scripts/localdb.mjs stop",
     "setup": "prisma migrate deploy && prisma db seed",
     "postinstall": "prisma generate"
   },

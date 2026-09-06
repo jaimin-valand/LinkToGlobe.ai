@@ -37,6 +37,7 @@ next-env.d.ts
 *.sqlite
 *.sqlite3
 /prisma/*.db
+/.localdb
 /tmp
 
 # generated code
