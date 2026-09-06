@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/*
+ * LinkToGlobe design tokens.
+ * Original identity — deliberately not LinkedIn's palette.
+ * Primary: a violet-leaning azure ("signal"). Accent: sunrise ("reach").
+ */
+:root {
+  --ltg-bg: #fbfbfd;
+  --ltg-surface: #ffffff;
+  --ltg-border: #e6e6ef;
+  --ltg-fg: #14152a;
+  --ltg-fg-muted: #5a5b74;
+
+  --ltg-signal: #3b46f1;
+  --ltg-signal-fg: #ffffff;
+  --ltg-reach: #ff7a4d;
+  --ltg-meridian: #0e7c7b;
+
+  --ltg-focus: #3b46f1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ltg-bg: #0b0b14;
+    --ltg-surface: #14151f;
+    --ltg-border: #262738;
+    --ltg-fg: #f3f3fb;
+    --ltg-fg-muted: #a0a1bd;
+
+    --ltg-signal: #7b83ff;
+    --ltg-signal-fg: #0b0b14;
+    --ltg-reach: #ff936b;
+    --ltg-meridian: #3fb8b6;
+
+    --ltg-focus: #7b83ff;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--ltg-bg);
+  --color-surface: var(--ltg-surface);
+  --color-border: var(--ltg-border);
+  --color-fg: var(--ltg-fg);
+  --color-fg-muted: var(--ltg-fg-muted);
+  --color-signal: var(--ltg-signal);
+  --color-signal-fg: var(--ltg-signal-fg);
+  --color-reach: var(--ltg-reach);
+  --color-meridian: var(--ltg-meridian);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ltg-focus);
+  outline-offset: 2px;
+}
