@@ -1,11 +1,11 @@
 import type { SVGProps } from "react";
 
 /**
- * LinkToGlobe mark: a meridian globe with an orbiting link node — "knowledge
- * connected outward". Original artwork; no third-party brand elements.
+ * LinkToGlobe.ai mark: a meridian globe with an orbiting link node.
+ * Original artwork; no third-party brand elements.
  */
 export function LogoMark({
-  title = "LinkToGlobe",
+  title = "LinkToGlobe.ai",
   ...props
 }: SVGProps<SVGSVGElement> & { title?: string }) {
   return (
@@ -39,6 +39,7 @@ export function Logo({ className }: { className?: string }) {
       <LogoMark width={28} height={28} />
       <span className="text-lg font-semibold tracking-tight">
         Link<span className="text-signal">To</span>Globe
+        <span className="text-fg-muted font-normal">.ai</span>
       </span>
     </span>
   );

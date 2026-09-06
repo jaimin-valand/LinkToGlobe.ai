@@ -24,7 +24,16 @@ export function LoginForm({ next }: { next?: string }) {
       )}
 
       <Field label="Email" htmlFor="email">
-        <Input id="email" name="email" type="email" required autoComplete="email" />
+        {/* key remounts the input so a failed attempt keeps the email in place */}
+        <Input
+          key={`email-${state.email ?? ""}`}
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          defaultValue={state.email ?? ""}
+        />
       </Field>
 
       <Field
@@ -42,7 +51,7 @@ export function LoginForm({ next }: { next?: string }) {
       </Field>
 
       <Button type="submit" disabled={pending}>
-        {pending ? "…" : mode === "signin" ? "Sign in" : "Create account"}
+        {pending ? "Working…" : mode === "signin" ? "Sign in" : "Create account"}
       </Button>
 
       <button
@@ -50,7 +59,7 @@ export function LoginForm({ next }: { next?: string }) {
         className="text-fg-muted text-sm underline underline-offset-4"
         onClick={() => setMode(mode === "signin" ? "register" : "signin")}
       >
-        {mode === "signin" ? "Need an account? Register" : "Have an account? Sign in"}
+        {mode === "signin" ? "Need an account? Register" : "Already have an account? Sign in"}
       </button>
     </form>
   );

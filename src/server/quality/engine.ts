@@ -1,5 +1,5 @@
 /**
- * Deterministic quality checks. No AI, no network — every result is reproducible
+ * Deterministic quality checks. No AI, no network. Every result is reproducible
  * from the draft text alone. AI-assisted review is separate and advisory
  * (src/server/ai). A draft must pass this engine to leave QUALITY_CHECK.
  */
@@ -28,12 +28,12 @@ export interface DraftInput {
   sourceNotes: string;
 }
 
-const PLACEHOLDER_PATTERNS = [
-  /lorem ipsum/i,
-  /\bTODO\b/,
-  /\bTKTK\b/i,
-  /\bXXX\b/,
-  /\bplaceholder\b/i,
+const PLACEHOLDER_PATTERNS: Array<[label: string, pattern: RegExp]> = [
+  ["lorem ipsum", /lorem ipsum/i],
+  ["TODO", /\bTODO\b/],
+  ["TKTK", /\bTKTK\b/i],
+  ["XXX", /\bXXX\b/],
+  ["placeholder", /\bplaceholder\b/i],
 ];
 const CLAIM_PATTERNS = [
   /\d+\s?%/,
@@ -58,43 +58,43 @@ export function runQualityChecks(draft: DraftInput): QualityResult {
   const titleLen = draft.title.trim().length;
   checks.push({
     id: "title",
-    label: "Title present and reasonable length",
+    label: "Title length",
     status: titleLen === 0 ? "fail" : titleLen < 10 || titleLen > 120 ? "warn" : "pass",
     detail:
-      titleLen === 0
-        ? "The draft has no title."
-        : `Title is ${titleLen} characters (aim for 10–120).`,
+      titleLen === 0 ? "There is no title yet." : `${titleLen} characters. Aim for 10 to 120.`,
   });
 
   // Hook
   checks.push({
     id: "hook",
-    label: "Opening hook written",
+    label: "Opening hook",
     status: draft.hook.trim().length === 0 ? "warn" : "pass",
     detail:
       draft.hook.trim().length === 0
-        ? "No hook set — the first line is what most readers see."
-        : "Hook is set.",
+        ? "No hook set. The first line is what most people see."
+        : "Set.",
   });
 
   // Body length
   checks.push({
     id: "body-length",
-    label: "Body has enough substance",
+    label: "Body length",
     status: wordCount === 0 ? "fail" : wordCount < 60 ? "warn" : "pass",
     detail:
       wordCount === 0
         ? "The body is empty."
-        : `Body is ${wordCount} words (${readingTimeMinutes} min read).`,
+        : `${wordCount} words, about a ${readingTimeMinutes} minute read.`,
   });
 
   // Placeholders
-  const placeholderHit = PLACEHOLDER_PATTERNS.find((p) => p.test(body) || p.test(draft.title));
+  const placeholderHit = PLACEHOLDER_PATTERNS.find(([, p]) => p.test(body) || p.test(draft.title));
   checks.push({
     id: "placeholders",
-    label: "No placeholder text left in",
+    label: "No placeholder text",
     status: placeholderHit ? "fail" : "pass",
-    detail: placeholderHit ? `Found leftover placeholder text (${placeholderHit}).` : "Clean.",
+    detail: placeholderHit
+      ? `Found leftover placeholder text ("${placeholderHit[0]}").`
+      : "None found.",
   });
 
   // Unsupported claims
@@ -102,23 +102,26 @@ export function runQualityChecks(draft: DraftInput): QualityResult {
   const hasNotes = draft.sourceNotes.trim().length > 0;
   checks.push({
     id: "claims",
-    label: "Data-like claims are backed by source notes",
+    label: "Claims have sources",
     status: claimHit && !hasNotes ? "warn" : "pass",
     detail:
       claimHit && !hasNotes
-        ? "The body cites figures or studies but Source notes is empty. Add attribution."
+        ? "The body mentions figures or studies but source notes is empty. Add where they came from."
         : claimHit
-          ? "Claims present and source notes provided."
-          : "No unsupported-looking claims detected.",
+          ? "Source notes provided."
+          : "Nothing here that needs a citation.",
   });
 
   // Link attribution
   const urls = body.match(URL_PATTERN) ?? [];
   checks.push({
     id: "links",
-    label: "Links look intentional",
+    label: "Links",
     status: urls.length > 5 ? "warn" : "pass",
-    detail: urls.length === 0 ? "No links." : `${urls.length} link(s) in the body.`,
+    detail:
+      urls.length === 0
+        ? "None."
+        : `${urls.length} ${urls.length === 1 ? "link" : "links"} in the body.`,
   });
 
   // Tone: shouting
@@ -126,12 +129,12 @@ export function runQualityChecks(draft: DraftInput): QualityResult {
   const allCapsWords = (body.match(/\b[A-Z]{4,}\b/g) ?? []).length;
   checks.push({
     id: "tone",
-    label: "Tone is measured",
+    label: "Tone",
     status: exclamations > 5 || allCapsWords > 4 ? "warn" : "pass",
     detail:
       exclamations > 5 || allCapsWords > 4
-        ? `Reads as shouty (${exclamations} "!", ${allCapsWords} ALL-CAPS words).`
-        : "Fine.",
+        ? `Reads as shouty: ${exclamations} exclamation marks, ${allCapsWords} words in capitals.`
+        : "Reads fine.",
   });
 
   const weights: Record<CheckStatus, number> = { pass: 1, warn: 0.5, fail: 0 };

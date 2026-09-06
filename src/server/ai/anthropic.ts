@@ -41,12 +41,15 @@ async function call(
       }),
     });
   } catch (err) {
-    return { ok: false, error: `Could not reach the AI provider: ${(err as Error).message}` };
+    return { ok: false, error: `Could not reach the AI service: ${(err as Error).message}` };
   }
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    return { ok: false, error: `AI provider returned ${res.status}. ${detail.slice(0, 300)}` };
+    return {
+      ok: false,
+      error: `The AI service returned an error (${res.status}). ${detail.slice(0, 200)}`,
+    };
   }
 
   const json = (await res.json()) as { content?: Array<{ type: string; text?: string }> };
@@ -56,7 +59,7 @@ async function call(
     .join("\n")
     .trim();
 
-  if (!text) return { ok: false, error: "AI provider returned an empty response." };
+  if (!text) return { ok: false, error: "The AI service sent back an empty response." };
   return { ok: true, data: text };
 }
 
@@ -94,7 +97,7 @@ export function createAnthropicProvider(config: AnthropicConfig): AiProvider {
     async expandDraft(ctx): Promise<AiResult<string>> {
       return call(
         config,
-        `You help draft professional content in the author's own voice. Tone: ${ctx.knowledge.tone || "clear and direct"}. Use only the facts in the notes provided — do not invent data, quotes, or sources. Return the draft body only.`,
+        `You help draft professional content in the author's own voice. Tone: ${ctx.knowledge.tone || "clear and direct"}. Use only the facts in the notes provided. Do not invent data, quotes, or sources. Return the draft body only.`,
         `Context:\n${knowledgeBlock(ctx.knowledge)}\n\nTitle: ${ctx.title}\nHook: ${ctx.hook || "(none)"}\nNotes / source material:\n${ctx.sourceNotes || "(none)"}\n\nExisting body:\n${ctx.body || "(empty)"}\n\nWrite or extend the draft body.`,
         1500,
       );

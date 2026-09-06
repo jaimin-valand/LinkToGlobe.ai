@@ -1,8 +1,8 @@
-# LinkToGlobe
+# LinkToGlobe.ai
 
 **Connect professional knowledge, ideas, and content to the wider world.**
 
-LinkToGlobe turns a professional's knowledge into quality-reviewed content —
+LinkToGlobe.ai turns a professional's knowledge into quality-reviewed content —
 and only marks it published after an explicit human approval step. This
 repository is at **Phase 1: Core MVP** (with early Phase 2 AI assistance).
 

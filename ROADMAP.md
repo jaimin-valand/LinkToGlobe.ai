@@ -1,4 +1,4 @@
-# LinkToGlobe — Roadmap
+# LinkToGlobe.ai — Roadmap
 
 Phases are sequential. Nothing below is "done" until it is built, tested, and
 merged. **Current phase: Phase 1 (in progress).**

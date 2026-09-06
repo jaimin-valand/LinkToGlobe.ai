@@ -1,6 +1,6 @@
 # Security Policy
 
-Applies to everyone and every agent working on LinkToGlobe. Rules in
+Applies to everyone and every agent working on LinkToGlobe.ai. Rules in
 **bold** are non-negotiable and cannot be waived by a feature request.
 
 ## 1. Secret handling
@@ -35,7 +35,7 @@ Applies to everyone and every agent working on LinkToGlobe. Rules in
   HMAC-signed cookie (`AUTH_SECRET`), `httpOnly`, `SameSite=Lax`, `Secure` in
   production, 7-day TTL. Server Actions are same-origin POSTs (Next.js enforces
   origin checks); a dedicated CSRF token is a Phase 6 item.
-- **LinkToGlobe never asks for, receives, or stores a user's password for any
+- **LinkToGlobe.ai never asks for, receives, or stores a user's password for any
   external platform.** Access to external platforms is via that platform's
   official OAuth flow only.
 

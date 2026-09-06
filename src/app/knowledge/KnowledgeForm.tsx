@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button, Field, FormError, Input, Textarea } from "@/components/ui/primitives";
 import { saveKnowledgeAction, type KnowledgeFormState } from "./actions";
 
@@ -18,6 +18,13 @@ const initial: KnowledgeFormState = {};
 export function KnowledgeForm({ values }: { values: Values }) {
   const [state, action, pending] = useActionState(saveKnowledgeAction, initial);
 
+  const [headline, setHeadline] = useState(values.headline);
+  const [expertise, setExpertise] = useState(values.expertise);
+  const [audience, setAudience] = useState(values.audience);
+  const [tone, setTone] = useState(values.tone);
+  const [topics, setTopics] = useState(values.topics.join(", "));
+  const [sources, setSources] = useState(values.sources);
+
   return (
     <form action={action} className="flex flex-col gap-5">
       {state.ok && (
@@ -27,42 +34,70 @@ export function KnowledgeForm({ values }: { values: Values }) {
       )}
       <FormError message={state.error} />
 
-      <Field label="Headline" htmlFor="headline" hint="One line: who you are, professionally.">
-        <Input id="headline" name="headline" defaultValue={values.headline} />
+      <Field label="Headline" htmlFor="headline" hint="One line about what you do.">
+        <Input
+          id="headline"
+          name="headline"
+          value={headline}
+          onChange={(e) => setHeadline(e.target.value)}
+        />
       </Field>
 
       <Field
         label="Expertise"
         htmlFor="expertise"
-        hint="What you know deeply. Used to ground drafts and topic suggestions."
+        hint="The subjects you know well. Drafts and suggestions use this."
       >
-        <Textarea id="expertise" name="expertise" rows={4} defaultValue={values.expertise} />
+        <Textarea
+          id="expertise"
+          name="expertise"
+          rows={4}
+          value={expertise}
+          onChange={(e) => setExpertise(e.target.value)}
+        />
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Audience" htmlFor="audience" hint="Who you are writing for.">
-          <Input id="audience" name="audience" defaultValue={values.audience} />
+          <Input
+            id="audience"
+            name="audience"
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+          />
         </Field>
-        <Field label="Preferred tone" htmlFor="tone" hint="e.g. direct, warm, technical.">
-          <Input id="tone" name="tone" defaultValue={values.tone} />
+        <Field label="Preferred tone" htmlFor="tone" hint="For example: direct, warm, technical.">
+          <Input id="tone" name="tone" value={tone} onChange={(e) => setTone(e.target.value)} />
         </Field>
       </div>
 
-      <Field label="Topics" htmlFor="topics" hint="Comma or newline separated.">
-        <Textarea id="topics" name="topics" rows={2} defaultValue={values.topics.join(", ")} />
+      <Field label="Topics" htmlFor="topics" hint="Separate with commas or new lines.">
+        <Textarea
+          id="topics"
+          name="topics"
+          rows={2}
+          value={topics}
+          onChange={(e) => setTopics(e.target.value)}
+        />
       </Field>
 
       <Field
         label="Reference material"
         htmlFor="sources"
-        hint="Links, notes, prior work you want drafts to draw on. Nothing here is published automatically."
+        hint="Links, notes, or past work for drafts to reference. None of this is published on its own."
       >
-        <Textarea id="sources" name="sources" rows={5} defaultValue={values.sources} />
+        <Textarea
+          id="sources"
+          name="sources"
+          rows={5}
+          value={sources}
+          onChange={(e) => setSources(e.target.value)}
+        />
       </Field>
 
       <div>
         <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Save knowledge"}
+          {pending ? "Saving…" : "Save"}
         </Button>
       </div>
     </form>

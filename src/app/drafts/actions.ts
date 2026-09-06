@@ -89,7 +89,24 @@ export async function deleteDraftAction(formData: FormData): Promise<void> {
 }
 
 export async function submitDraftAction(formData: FormData) {
-  await lifecycle(formData, content.submitForReview);
+  const userId = await currentUserId();
+  const id = String(formData.get("id") ?? "");
+
+  // Persist any unsaved edits carried in the form before running checks.
+  const edit = editSchema.safeParse(Object.fromEntries(formData));
+  if (edit.success) {
+    await content.updateDraft(userId, id, {
+      title: edit.data.title,
+      hook: edit.data.hook,
+      body: edit.data.body,
+      sourceNotes: edit.data.sourceNotes,
+    });
+  }
+
+  await content.submitForReview(userId, id);
+  revalidatePath(`/drafts/${id}`);
+  revalidatePath("/drafts");
+  revalidatePath("/approvals");
 }
 export async function rerunQualityAction(formData: FormData) {
   await lifecycle(formData, content.rerunQuality);
@@ -106,7 +123,7 @@ export async function approveAction(formData: FormData) {
 
 const rejectSchema = z.object({
   id: z.string().min(1),
-  reason: z.string().min(1, "A reason is required."),
+  reason: z.string().min(1, "Add a reason."),
 });
 
 export interface RejectState {
@@ -143,7 +160,7 @@ export async function aiAssistAction(_prev: AiState, formData: FormData): Promis
   const kind = String(formData.get("kind") ?? "");
   const ai = getAi();
   if (!ai.enabled) {
-    return { disabled: true, error: "AI assistance is off (AI_PROVIDER=manual)." };
+    return { disabled: true, error: "AI help is turned off." };
   }
 
   const k = await getKnowledge(userId);
@@ -177,5 +194,5 @@ export async function aiAssistAction(_prev: AiState, formData: FormData): Promis
     const r = await ai.review(draft);
     return r.ok ? { notes: r.data } : { error: r.error };
   }
-  return { error: "Unknown AI action." };
+  return { error: "That option is not available." };
 }

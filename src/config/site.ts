@@ -2,10 +2,10 @@
  * Static, non-secret site metadata. Safe to import from client or server.
  */
 export const site = {
-  name: "LinkToGlobe",
-  tagline: "Connect professional knowledge, ideas, and content to the wider world.",
+  name: "LinkToGlobe.ai",
+  tagline: "Write, check, and approve professional content in one place.",
   description:
-    "LinkToGlobe turns your professional knowledge into researched, quality-reviewed content — with an explicit human approval step before anything is published.",
+    "Draft content from your own expertise, run it through automated checks, and approve it yourself before it counts as published.",
   nav: [
     { label: "Overview", href: "/" },
     { label: "Knowledge", href: "/knowledge", auth: true },

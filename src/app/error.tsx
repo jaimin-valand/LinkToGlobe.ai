@@ -18,7 +18,7 @@ export default function Error({
   return (
     <div role="alert" className="flex flex-col items-start gap-4 py-16">
       <h1 className="text-2xl font-semibold">Something went wrong</h1>
-      <p className="text-fg-muted">An unexpected error occurred while rendering this page.</p>
+      <p className="text-fg-muted">This page hit an error. Trying again may fix it.</p>
       <button
         type="button"
         onClick={() => retry()}

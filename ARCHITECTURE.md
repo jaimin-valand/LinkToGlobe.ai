@@ -1,4 +1,4 @@
-# LinkToGlobe — Architecture
+# LinkToGlobe.ai — Architecture
 
 Status: **Phase 0 (Foundation).** This document describes the target design.
 Only the parts marked _implemented_ exist today; everything else is a boundary

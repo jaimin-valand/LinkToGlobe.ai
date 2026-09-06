@@ -12,10 +12,16 @@ export function RejectForm({ id }: { id: string }) {
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="id" value={id} />
       <FormError message={state.error} />
-      <Textarea name="reason" rows={2} placeholder="Why is this being rejected?" required />
+      <Textarea
+        name="reason"
+        rows={2}
+        placeholder="What needs to change before this can be published?"
+        required
+        aria-label="Reason for sending back"
+      />
       <div>
         <Button type="submit" variant="danger" disabled={pending}>
-          {pending ? "…" : "Reject"}
+          {pending ? "Working…" : "Send back with this reason"}
         </Button>
       </div>
     </form>

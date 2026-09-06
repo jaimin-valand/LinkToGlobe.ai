@@ -10,8 +10,8 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body style={{ fontFamily: "system-ui, sans-serif", margin: 0, padding: "4rem 1.5rem" }}>
-        <h1 style={{ fontSize: "1.5rem" }}>LinkToGlobe failed to load</h1>
-        <p style={{ color: "#5a5b74" }}>A critical error occurred. Reloading may help.</p>
+        <h1 style={{ fontSize: "1.5rem" }}>LinkToGlobe.ai could not load</h1>
+        <p style={{ color: "#5a5b74" }}>Something broke while loading. Try reloading the page.</p>
         <button
           type="button"
           onClick={() => retry()}

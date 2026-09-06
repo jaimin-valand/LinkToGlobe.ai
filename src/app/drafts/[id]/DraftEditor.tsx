@@ -21,6 +21,13 @@ interface Draft {
 const editInitial: EditState = {};
 const aiInitial: AiState = {};
 
+const AI_LABELS: Record<string, string> = {
+  ideas: "Topic ideas",
+  hook: "Hook options",
+  expand: "Expand the body",
+  review: "Review",
+};
+
 export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boolean }) {
   const [title, setTitle] = useState(draft.title);
   const [hook, setHook] = useState(draft.hook);
@@ -30,7 +37,13 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
   const [saveState, save, saving] = useActionState(saveDraftAction, editInitial);
   const [ai, runAi, aiPending] = useActionState(aiAssistAction, aiInitial);
 
-  const hidden = (
+  const dirty =
+    title !== draft.title ||
+    hook !== draft.hook ||
+    body !== draft.body ||
+    sourceNotes !== draft.sourceNotes;
+
+  const fieldInputs = (
     <>
       <input type="hidden" name="id" value={draft.id} />
       <input type="hidden" name="title" value={title} />
@@ -44,7 +57,7 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
     <div className="flex flex-col gap-6">
       <form action={save} className="flex flex-col gap-4">
         <input type="hidden" name="id" value={draft.id} />
-        {saveState.ok && (
+        {saveState.ok && !dirty && (
           <p className="rounded-md border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-800 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300">
             Saved.
           </p>
@@ -62,7 +75,7 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
           />
         </Field>
 
-        <Field label="Hook" htmlFor="hook" hint="The opening line readers see first.">
+        <Field label="Hook" htmlFor="hook" hint="The first line people see.">
           <Textarea
             id="hook"
             name="hook"
@@ -85,7 +98,7 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
         <Field
           label="Source notes"
           htmlFor="sourceNotes"
-          hint="Facts, links, quotes the draft draws on. Quality checks look here when the body cites figures."
+          hint="Facts, links, and quotes the draft uses. The checks look here when the body mentions figures."
         >
           <Textarea
             id="sourceNotes"
@@ -96,33 +109,30 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
           />
         </Field>
 
-        <div className="flex flex-wrap gap-3">
-          <Button type="submit" variant="secondary" disabled={saving}>
-            {saving ? "Saving…" : "Save"}
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" variant="secondary" disabled={saving || !dirty}>
+            {saving ? "Saving…" : dirty ? "Save changes" : "Saved"}
           </Button>
+          {dirty && !saving && (
+            <span className="text-fg-muted text-xs">You have unsaved changes.</span>
+          )}
         </div>
       </form>
 
       {aiEnabled && (
         <div className="border-border bg-surface rounded-lg border p-4">
-          <h3 className="text-sm font-semibold">AI assist</h3>
+          <h3 className="text-sm font-semibold">AI help</h3>
           <p className="text-fg-muted mt-0.5 text-xs">
-            Suggestions only. Nothing is applied until you paste it in. Save first so the assistant
-            sees your latest text.
+            Suggestions only. Nothing changes until you add it yourself. Save first so it uses your
+            latest text.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {(["ideas", "hook", "expand", "review"] as const).map((kind) => (
               <form key={kind} action={runAi}>
-                {hidden}
+                {fieldInputs}
                 <input type="hidden" name="kind" value={kind} />
                 <Button type="submit" variant="ghost" disabled={aiPending}>
-                  {kind === "ideas"
-                    ? "Topic ideas"
-                    : kind === "hook"
-                      ? "Hook options"
-                      : kind === "expand"
-                        ? "Expand body"
-                        : "Review"}
+                  {AI_LABELS[kind]}
                 </Button>
               </form>
             ))}
@@ -147,7 +157,7 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
                     className="text-signal shrink-0 text-xs underline underline-offset-2"
                     onClick={() => setHook(x)}
                   >
-                    use
+                    Use this
                   </button>
                 </li>
               ))}
@@ -161,9 +171,9 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
               <button
                 type="button"
                 className="text-signal mt-2 text-xs underline underline-offset-2"
-                onClick={() => setBody(ai.body!)}
+                onClick={() => setBody(ai.body ?? "")}
               >
-                replace body with this
+                Replace the body with this
               </button>
             </div>
           )}
@@ -178,7 +188,7 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
                         : "text-fg-muted"
                     }
                   >
-                    {n.severity}:
+                    {n.severity === "warning" ? "Worth a look:" : "Note:"}
                   </span>{" "}
                   {n.message}
                 </li>
@@ -189,14 +199,13 @@ export function DraftEditor({ draft, aiEnabled }: { draft: Draft; aiEnabled: boo
       )}
 
       <form action={submitDraftAction} className="border-border bg-surface rounded-lg border p-4">
-        <input type="hidden" name="id" value={draft.id} />
-        <h3 className="text-sm font-semibold">Ready?</h3>
+        {fieldInputs}
+        <h3 className="text-sm font-semibold">Ready to submit?</h3>
         <p className="text-fg-muted mt-0.5 text-xs">
-          Submitting runs the automated quality checks and moves the draft to Quality check. Save
-          your edits first.
+          This saves the draft, runs the automated checks, and moves it into review.
         </p>
         <Button type="submit" className="mt-3">
-          Submit for quality check
+          Submit for review
         </Button>
       </form>
     </div>

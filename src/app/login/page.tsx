@@ -17,10 +17,10 @@ export default async function LoginPage({
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 py-10">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in to LinkToGlobe</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
         <p className="text-fg-muted mt-1 text-sm">
-          Your account is local to this instance. Passwords are hashed (scrypt); the app never
-          stores credentials for any external platform.
+          Your account lives only on this install. Passwords are stored hashed. The app never keeps
+          sign-in details for any other service.
         </p>
       </div>
       <Card>

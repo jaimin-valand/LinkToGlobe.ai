@@ -57,7 +57,7 @@ export async function updateDraft(
 ): Promise<ContentDraft> {
   const draft = await owned(userId, id);
   if (draft.state !== "DRAFT") {
-    throw new Error("Only drafts in the Draft state can be edited.");
+    throw new Error("You can only edit a draft while it is still in Draft.");
   }
   if (!data.title.trim()) throw new Error("A title is required.");
   return prisma.$transaction(async (tx) => {
@@ -78,7 +78,7 @@ export async function updateDraft(
 export async function deleteDraft(userId: string, id: string): Promise<void> {
   const draft = await owned(userId, id);
   if (draft.state === "PUBLISHED") {
-    throw new Error("Published content cannot be deleted (it is part of the record).");
+    throw new Error("Published items cannot be deleted.");
   }
   await prisma.$transaction(async (tx) => {
     await tx.contentDraft.delete({ where: { id } });
@@ -116,7 +116,7 @@ export async function submitForReview(userId: string, id: string) {
 /** Re-run the quality engine on a draft already in QUALITY_CHECK. */
 export async function rerunQuality(userId: string, id: string) {
   const draft = await owned(userId, id);
-  if (draft.state !== "QUALITY_CHECK") throw new Error("Draft is not in quality check.");
+  if (draft.state !== "QUALITY_CHECK") throw new Error("This draft is not in review.");
   const result = runQualityChecks(draft);
   await prisma.$transaction(async (tx) => {
     await persistQuality(tx, id, result);
@@ -133,8 +133,10 @@ export async function sendToApproval(userId: string, id: string) {
     where: { draftId: id },
     orderBy: { createdAt: "desc" },
   });
-  if (!latest) throw new Error("Run a quality check first.");
-  if (!latest.passed) throw new Error("The quality check has failing items. Fix them and re-run.");
+  if (!latest) throw new Error("Run the checks first.");
+  if (!latest.passed) {
+    throw new Error("The checks have blocking items. Fix them and run again.");
+  }
   return prisma.$transaction(async (tx) => {
     const updated = await tx.contentDraft.update({ where: { id }, data: { state: to } });
     await log(tx, userId, id, "quality.passed");
@@ -164,7 +166,7 @@ export async function approveAndPublish(userId: string, id: string) {
 export async function reject(userId: string, id: string, reason: string) {
   const draft = await owned(userId, id);
   const to = assertTransition(draft.state, "reject");
-  if (!reason.trim()) throw new Error("A rejection reason is required.");
+  if (!reason.trim()) throw new Error("Add a reason.");
   return prisma.$transaction(async (tx) => {
     const updated = await tx.contentDraft.update({
       where: { id },

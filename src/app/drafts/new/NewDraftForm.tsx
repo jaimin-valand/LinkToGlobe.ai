@@ -12,7 +12,7 @@ export function NewDraftForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <FormError message={state.error} />
-      <Field label="Working title" htmlFor="title" hint="You can change this later.">
+      <Field label="Title" htmlFor="title" hint="You can change this later.">
         <Input id="title" name="title" required autoFocus maxLength={200} />
       </Field>
       <div>

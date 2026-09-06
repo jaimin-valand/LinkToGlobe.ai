@@ -27,7 +27,7 @@ export function QualityReportView({
   return (
     <div className="border-border bg-surface rounded-lg border p-5">
       <div className="flex items-center justify-between gap-4">
-        <h3 className="font-medium">Quality report</h3>
+        <h3 className="font-medium">Checks</h3>
         <span
           className={cn(
             "rounded px-2 py-0.5 text-xs font-semibold uppercase",
@@ -36,7 +36,7 @@ export function QualityReportView({
               : "bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-300",
           )}
         >
-          {passed ? "Passed" : "Has blockers"} · {score}/100
+          {passed ? "Passed" : "Blocked"}, {score} of 100
         </span>
       </div>
       <ul className="mt-3 flex flex-col gap-2">
@@ -47,8 +47,8 @@ export function QualityReportView({
               aria-hidden
             />
             <span>
-              <span className="font-medium">{c.label}</span>
-              <span className="text-fg-muted"> — {c.detail}</span>
+              <span className="font-medium">{c.label}.</span>{" "}
+              <span className="text-fg-muted">{c.detail}</span>
             </span>
           </li>
         ))}
@@ -56,7 +56,7 @@ export function QualityReportView({
       {createdAt && (
         <p className="text-fg-muted mt-3 text-xs">
           Run{" "}
-          {new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(
+          {new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(
             createdAt,
           )}
         </p>

@@ -8,7 +8,7 @@ export function cn(...parts: Array<string | false | null | undefined>): string {
 }
 
 /** Format an integer with locale grouping (e.g. 8807 -> "8,807"). */
-export function formatCount(value: number, locale = "en-US"): string {
+export function formatCount(value: number, locale = "en-GB"): string {
   if (!Number.isFinite(value)) {
     throw new TypeError("formatCount expects a finite number");
   }

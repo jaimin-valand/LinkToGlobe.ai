@@ -1,4 +1,4 @@
-# Contributing to LinkToGlobe
+# Contributing to LinkToGlobe.ai
 
 ## Prerequisites
 

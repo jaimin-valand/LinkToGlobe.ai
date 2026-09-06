@@ -1,8 +1,8 @@
 {
-  "name": "linktoglobe",
+  "name": "linktoglobe-ai",
   "version": "0.1.0",
   "private": true,
-  "description": "Connect professional knowledge, ideas, and content to the wider world.",
+  "description": "Write, check, and approve professional content in one place.",
   "engines": {
     "node": ">=20.9.0"
   },

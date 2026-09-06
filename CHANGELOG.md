@@ -6,6 +6,28 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed the product to **LinkToGlobe.ai** throughout the UI and docs.
+- Rewrote all user-facing text in plain UK English: shorter sentences, no
+  jargon or em dashes, consistent wording across every screen. Meaning and
+  behaviour unchanged.
+- Header navigation now works on small screens (scrolls instead of overflowing).
+- The pipeline stages on the overview link to their pages when signed in.
+- Drafts list has a status filter (All / Draft / Quality check / Awaiting
+  approval / Published / Rejected).
+- Submitting a draft for review now saves any unsaved edits first.
+- Delete and "Approve and publish" ask for confirmation.
+- A failed sign-in keeps the email address in the box.
+- Knowledge and draft editors are fully controlled, so saved values stay put.
+- Activity feed shows readable labels instead of internal action codes.
+- Dates display in UK format.
+
+### Fixed
+
+- Quality report no longer prints an internal regular expression when it finds
+  leftover placeholder text.
+
 ### Added — Phase 1 (Core MVP) + early Phase 2 (AI assist)
 
 - **Database**: PostgreSQL via Prisma 6. Schema for `User`, `KnowledgeProfile`,
@@ -53,7 +75,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added — Phase 0: Foundation & Architecture
 
 - Next.js 16 (App Router, `src/`) + React 19 + TypeScript 5 project scaffold.
-- Tailwind CSS v4 with an original LinkToGlobe design-token palette and logo mark.
+- Tailwind CSS v4 with an original LinkToGlobe.ai design-token palette and logo mark.
 - Application shell: root layout, responsive header with navigation placeholder,
   footer, skip link, `error`/`global-error`/`loading`/`not-found` boundaries,
   and honest placeholder pages for Pipeline / Approvals / Analytics.

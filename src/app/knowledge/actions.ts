@@ -26,7 +26,7 @@ export async function saveKnowledgeAction(
   const user = await requireUser();
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+    return { error: parsed.error.issues[0]?.message ?? "Check the form and try again." };
   }
   const { topics, ...rest } = parsed.data;
   try {

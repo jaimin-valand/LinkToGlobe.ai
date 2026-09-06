@@ -2,7 +2,7 @@ import type { AiProvider, AiResult } from "./types";
 
 const disabled = <T>(): AiResult<T> => ({
   ok: false,
-  error: "AI assistance is disabled. Set AI_PROVIDER=anthropic and AI_API_KEY to enable it.",
+  error: "AI help is turned off. Set AI_PROVIDER=anthropic and AI_API_KEY to use it.",
 });
 
 /**

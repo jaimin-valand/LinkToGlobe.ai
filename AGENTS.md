@@ -10,14 +10,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ---
 
-# LinkToGlobe — Agent Guide
+# LinkToGlobe.ai — Agent Guide
 
 Rules every coding agent (and human) must follow when working in this repo.
 If a rule here conflicts with a request, stop and raise it.
 
 ## 1. Project purpose
 
-LinkToGlobe helps a professional turn their knowledge into researched,
+LinkToGlobe.ai helps a professional turn their knowledge into researched,
 quality-reviewed content and — only after explicit human approval — publish it
 to external destinations. The long-term pipeline is:
 

@@ -14,8 +14,7 @@ export default async function KnowledgePage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Your knowledge</h1>
         <p className="text-fg-muted mt-1 text-sm">
-          The professional context every draft is grounded in. This is the{" "}
-          <span className="font-mono">USER_KNOWLEDGE</span> pipeline stage.
+          The background every draft draws on. Fill in what you can; you can change it any time.
         </p>
       </div>
 

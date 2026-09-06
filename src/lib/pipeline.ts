@@ -1,7 +1,7 @@
 /**
- * The LinkToGlobe content pipeline, expressed as data.
+ * The LinkToGlobe.ai content pipeline, expressed as data.
  *
- * This module intentionally contains NO behavior — it is the single source of
+ * This module intentionally contains NO behaviour. It is the single source of
  * truth for the stage sequence that the rest of the system (UI, DB enums,
  * docs) is built around. Implementation of each stage lands in later phases;
  * see ROADMAP.md.
@@ -34,75 +34,75 @@ export interface PipelineStageMeta {
 export const PIPELINE_STAGE_META: Record<PipelineStage, PipelineStageMeta> = {
   USER_KNOWLEDGE: {
     stage: "USER_KNOWLEDGE",
-    title: "User knowledge",
-    summary: "Expertise, positioning, and source material the user provides.",
+    title: "Your knowledge",
+    summary: "What you know, who you write for, and the material you want to draw on.",
     humanGate: false,
   },
   RESEARCH: {
     stage: "RESEARCH",
     title: "Research",
-    summary: "Gather supporting material from approved, attributable sources.",
+    summary: "Supporting material from sources you can cite.",
     humanGate: false,
   },
   SIGNALS: {
     stage: "SIGNALS",
     title: "Signals",
-    summary: "Detect timely themes worth responding to.",
+    summary: "Topics that are worth a timely response.",
     humanGate: false,
   },
   IDEAS: {
     stage: "IDEAS",
     title: "Ideas",
-    summary: "Turn signals and knowledge into candidate topics.",
+    summary: "Those topics shaped into things you could write about.",
     humanGate: false,
   },
   HOOKS: {
     stage: "HOOKS",
     title: "Hooks",
-    summary: "Draft opening angles for the strongest ideas.",
+    summary: "Opening lines for the ideas worth pursuing.",
     humanGate: false,
   },
   CONTENT: {
     stage: "CONTENT",
-    title: "Content",
-    summary: "Produce full drafts from an approved idea and hook.",
+    title: "Draft",
+    summary: "The full piece, written out.",
     humanGate: false,
   },
   QUALITY_REVIEW: {
     stage: "QUALITY_REVIEW",
-    title: "Quality review",
-    summary: "Automated checks for accuracy, originality, and policy fit.",
+    title: "Quality checks",
+    summary: "Automated checks that run before a person reviews it.",
     humanGate: false,
   },
   USER_APPROVAL: {
     stage: "USER_APPROVAL",
-    title: "User approval",
-    summary: "Mandatory human sign-off. Nothing is published without it.",
+    title: "Your approval",
+    summary: "You read it and decide. Nothing goes out without this step.",
     humanGate: true,
   },
   SCHEDULE_PUBLISH: {
     stage: "SCHEDULE_PUBLISH",
-    title: "Schedule / publish",
-    summary: "Queue or publish approved content to a connected destination.",
+    title: "Publish",
+    summary: "Send approved content out, or queue it for later.",
     humanGate: false,
   },
   ANALYTICS: {
     stage: "ANALYTICS",
     title: "Analytics",
-    summary: "Collect performance data for published content.",
+    summary: "How published content performed.",
     humanGate: false,
   },
   LEARNING: {
     stage: "LEARNING",
     title: "Learning",
-    summary: "Feed outcomes back into research, ideas, and drafting.",
+    summary: "Using what worked to shape the next round.",
     humanGate: false,
   },
 };
 
 /**
  * The lifecycle a single piece of content moves through before it can be
- * published. Enforced by the eventual publishing service — see SECURITY.md.
+ * published. Enforced by the publishing service; see SECURITY.md.
  */
 export const APPROVAL_LIFECYCLE = ["DRAFT", "QUALITY_CHECK", "USER_APPROVAL", "PUBLISH"] as const;
 
