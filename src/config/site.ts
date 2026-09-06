@@ -12,6 +12,7 @@ export const site = {
     { label: "Drafts", href: "/drafts", auth: true },
     { label: "Approvals", href: "/approvals", auth: true },
     { label: "Analytics", href: "/analytics", auth: true },
+    { label: "Integrations", href: "/settings/integrations", auth: true },
   ],
 } as const;
 

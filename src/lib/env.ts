@@ -8,6 +8,11 @@ import { z } from "zod";
  *    They must never be imported into a Client Component.
  *  - Anything the browser may see MUST be prefixed `NEXT_PUBLIC_` and declared
  *    in `clientSchema`. `isPublicEnvKey()` enforces that boundary in tests.
+ *
+ * Integration credentials (AI, research, LinkedIn, email, company data,
+ * calendar) are all OPTIONAL. The app runs fully with none of them set; each
+ * integration reports "Not configured" until its variables are provided.
+ * See src/server/integrations/registry.ts.
  */
 
 const serverSchema = z.object({
@@ -22,10 +27,38 @@ const serverSchema = z.object({
 
   AUTH_SECRET: z.string().min(16, "AUTH_SECRET must be at least 16 characters"),
 
-  AI_PROVIDER: z.enum(["manual", "anthropic"]).default("manual"),
-  AI_API_KEY: z.string().optional(),
+  // ── AI provider (optional; defaults to the no-op "manual" provider) ─────────
+  AI_PROVIDER: z.enum(["manual", "anthropic", "openai"]).default("manual"),
   AI_MODEL: z.string().default("claude-sonnet-5"),
+  AI_API_KEY: z.string().optional(), // Anthropic
+  OPENAI_API_KEY: z.string().optional(),
 
+  // ── Research / search provider (optional; boundary only, not implemented) ───
+  RESEARCH_PROVIDER: z.string().optional(),
+  RESEARCH_API_KEY: z.string().optional(),
+
+  // ── LinkedIn official OAuth app (optional; boundary only) ───────────────────
+  LINKEDIN_CLIENT_ID: z.string().optional(),
+  LINKEDIN_CLIENT_SECRET: z.string().optional(),
+  LINKEDIN_REDIRECT_URI: z.string().url().optional(),
+
+  // ── Email provider OAuth app (optional; boundary only) ─────────────────────
+  EMAIL_PROVIDER: z.enum(["gmail", "microsoft"]).optional(),
+  EMAIL_OAUTH_CLIENT_ID: z.string().optional(),
+  EMAIL_OAUTH_CLIENT_SECRET: z.string().optional(),
+  EMAIL_OAUTH_REDIRECT_URI: z.string().url().optional(),
+
+  // ── Company / people data provider (optional; boundary only) ───────────────
+  COMPANY_DATA_PROVIDER: z.string().optional(),
+  COMPANY_DATA_API_KEY: z.string().optional(),
+
+  // ── Calendar provider OAuth app (optional; boundary only) ──────────────────
+  CALENDAR_PROVIDER: z.enum(["google", "microsoft"]).optional(),
+  CALENDAR_OAUTH_CLIENT_ID: z.string().optional(),
+  CALENDAR_OAUTH_CLIENT_SECRET: z.string().optional(),
+  CALENDAR_OAUTH_REDIRECT_URI: z.string().url().optional(),
+
+  // ── Dev seed convenience ──────────────────────────────────────────────────
   SEED_USER_EMAIL: z.string().email().optional(),
   SEED_USER_PASSWORD: z.string().min(8).optional(),
 });
@@ -54,6 +87,11 @@ export function getServerEnv(): ServerEnv {
   if (parsed.data.AI_PROVIDER === "anthropic" && !parsed.data.AI_API_KEY) {
     throw new Error(
       "Invalid server environment configuration:\n  - AI_API_KEY: required when AI_PROVIDER=anthropic",
+    );
+  }
+  if (parsed.data.AI_PROVIDER === "openai" && !parsed.data.OPENAI_API_KEY) {
+    throw new Error(
+      "Invalid server environment configuration:\n  - OPENAI_API_KEY: required when AI_PROVIDER=openai",
     );
   }
   cachedServer = parsed.data;

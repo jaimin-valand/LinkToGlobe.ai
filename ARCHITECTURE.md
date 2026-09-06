@@ -113,16 +113,32 @@ flowchart LR
 State for a single item is tracked by `ApprovalState` (`prisma/schema.prisma` /
 `APPROVAL_LIFECYCLE` in `src/lib/pipeline.ts`).
 
-## 6. Future integration boundaries
+## 6. Integration boundaries
 
-- **AI provider:** a single interface (`generate`, `embed`, `review`) with
-  per-provider implementations selected by env config. No provider SDK is
-  imported outside `src/server/ai`.
-- **Publishing integrations:** a common `Integration` interface
-  (`authorize`, `publish`, `fetchMetrics`, `revoke`). Each lives in its own
-  folder, is feature-flagged, and is disableable without touching core code.
-  Only official APIs and OAuth are permitted (see `SECURITY.md`).
-- **Analytics:** written through one module so the backing store can change.
+Every external service is optional. The app runs with none configured, and each
+one reports its state on `/settings/integrations`. Credentials are environment
+variables only; no client SDK is imported outside its own folder.
+
+- **Registry** (`src/server/integrations/`) — a declaration of each connection
+  (id, category, required env vars, capabilities, safety notes) plus
+  `listIntegrations()`, which checks env presence only and never calls out.
+  `implemented: false` marks a boundary whose client code is future work.
+- **AI provider** (`src/server/ai/`, _implemented_) — one `AiProvider` interface
+  (`suggestIdeas`, `suggestHook`, `expandDraft`, `review`) with `manual`
+  (default, no-op), `anthropic`, and `openai` implementations selected by
+  `AI_PROVIDER`. Output is advisory and never applied without a user action.
+- **Research provider** (_boundary only_) — `RESEARCH_PROVIDER` /
+  `RESEARCH_API_KEY`. Licensed search/news API, no scraping.
+- **Publishing (LinkedIn)** (_boundary only_) — official OAuth + API only.
+  A common `Integration` interface (`authorize`, `publish`, `fetchMetrics`,
+  `revoke`) lands with the first destination. A post is reported published only
+  when the API confirms it.
+- **Email (Gmail / Outlook)** (_boundary only_) — official OAuth. Sending
+  requires explicit user approval.
+- **Company & people data** (_boundary only_) — licensed data source only.
+  Contact details are never fabricated.
+- **Calendar (Google / Outlook)** (_boundary only_) — optional, official OAuth.
+- **Analytics** — written through one module so the backing store can change.
 
 ## 7. Security boundaries
 

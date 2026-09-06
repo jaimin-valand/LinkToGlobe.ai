@@ -4,6 +4,36 @@ Newest first. Each entry: context, decision, rationale, alternatives, status.
 
 ---
 
+## ADR-0013 — Integration registry declares every external connection
+
+- **Context:** The product will connect to AI, research, LinkedIn, email,
+  company-data and calendar providers. These arrive over many phases, but the
+  boundary should exist now so features can be added without reshaping the app.
+- **Decision:** `src/server/integrations/` holds a declarative registry: each
+  connection lists its id, category, required env vars, capabilities and safety
+  notes, plus an `implemented` flag. `listIntegrations()` checks env presence
+  only — no network calls, no SDK imports. `/settings/integrations` renders the
+  live state ("Connected" / "Not configured" / "Boundary only").
+- **Rationale:** One place to see what is wired up; a real "Not configured"
+  state instead of fake buttons; adding a provider is a new folder plus a
+  registry line.
+- **Alternatives:** Ad-hoc `process.env` checks scattered through features
+  (no overview, easy to fake); a full plugin system (premature).
+- **Status:** Accepted. AI (Anthropic + OpenAI) is implemented; the rest are
+  boundary-only.
+
+## ADR-0012 — AI layer supports OpenAI alongside Anthropic
+
+- **Context:** ADR-0010 established a provider-agnostic AI interface with
+  `manual` and `anthropic`. OpenAI is now also wanted.
+- **Decision:** Add `src/server/ai/openai.ts` implementing the same
+  `AiProvider` interface via the Chat Completions REST API (no SDK).
+  `AI_PROVIDER` gains `openai`; `getAi()` selects it when `OPENAI_API_KEY` is
+  set. `AI_MODEL` is the single model knob for whichever provider is active.
+- **Rationale:** The interface already existed; this is a second implementation,
+  not a change to callers. Still no vendor SDK in the dependency tree.
+- **Status:** Accepted.
+
 ## ADR-0011 — "Publish" is internal-only until an integration exists
 
 - **Context:** Phase 1 needs a terminal state after approval, but external

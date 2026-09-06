@@ -49,8 +49,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` complete
 
 ## Phase 4 — Integrations
 
-- [ ] Common `Integration` interface + OAuth framework
-- [ ] First publishing destination via its official API
+- [~] Integration registry + `/settings/integrations` status page (boundary only)
+- [x] AI providers: Anthropic and OpenAI behind one interface
+- [ ] Common `Integration` interface + OAuth framework for publishing/email/calendar
+- [ ] First publishing destination (LinkedIn) via its official API
 - [ ] Explicit approval enforced before any external publish
 - [ ] Token encryption at rest, scope minimization
 

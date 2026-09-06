@@ -38,10 +38,13 @@ integration without the security review in `SECURITY.md` §6–7.
   microservices, queues, or extra runtimes without a `DECISIONS.md` entry.
 - **The pipeline is data, not hardcoded flow.** `src/lib/pipeline.ts` is the
   single source of truth for stage order. Keep DB enums and docs in sync with it.
-- **Provider-agnostic AI layer.** All model calls go through one adapter module
-  (Phase 2). No SDK calls scattered through the codebase.
-- **Integrations are plugins.** Each external destination implements a common
-  interface behind `src/server/integrations/*` (Phase 4).
+- **Provider-agnostic AI layer.** All model calls go through `src/server/ai`
+  (`manual` / `anthropic` / `openai`). No vendor SDK in the dependency tree.
+- **Integrations are declared, then built.** `src/server/integrations/registry.ts`
+  lists every external connection with its required env vars. Adding a provider
+  is a new folder plus a registry line. Every integration is optional; an
+  unconfigured one shows "Not configured", never fake success. Read env on the
+  server only.
 - **Server/client boundary is sacred.** Secrets and server-only code never cross
   into a Client Component. Only `NEXT_PUBLIC_*` values reach the browser.
 - Prefer boring, well-documented solutions. Add a dependency only when it

@@ -71,6 +71,21 @@ Applies to everyone and every agent working on LinkToGlobe.ai. Rules in
 - Each integration requests the minimum OAuth scopes, is feature-flagged, and
   can be revoked/disabled independently.
 
+### 6a. Integration credentials
+
+- Every integration is **optional**. The app runs with none configured and shows
+  a "Not configured" state (`/settings/integrations`), never fake success.
+- Credentials are **environment variables read on the server only**. They are
+  never sent to the browser and never appear in client code.
+- LinkedIn / email / calendar credentials are **OAuth app** credentials
+  (client id + secret). The app never asks a user for their platform password
+  and never stores platform session cookies or scraped tokens.
+- Company and people data comes from a **licensed provider API**. Contact
+  details (email, phone, role) are never invented; each field is tagged with its
+  source (verified provider data vs. AI summary vs. user note).
+- `src/server/integrations/registry.ts` reads env presence only. It performs no
+  network calls, so viewing the integrations page cannot leak or test a key.
+
 ## 7. External publishing safety
 
 Every externally published item MUST pass through, in order:

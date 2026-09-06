@@ -6,6 +6,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — integration boundaries
+
+- `src/server/integrations/` registry: a declaration of every external service
+  the product will connect to (AI, research, LinkedIn, email, company/people
+  data, calendar) with required env vars, capabilities and safety notes.
+- `/settings/integrations` page showing the live state of each connection
+  ("Connected", "Not configured", "Boundary only"). Read-only, no fake actions.
+- OpenAI provider (`src/server/ai/openai.ts`) alongside the existing Anthropic
+  one. `AI_PROVIDER` now accepts `openai`.
+- `.env.example` lists the variable names for every future integration. All are
+  optional; the app runs with none set. No secrets, no invented values.
+- `src/lib/env.ts` parses the new variables as optional and fails fast only if
+  `AI_PROVIDER` names a provider whose key is missing.
+
 ### Changed
 
 - Renamed the product to **LinkToGlobe.ai** throughout the UI and docs.
