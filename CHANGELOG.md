@@ -13,8 +13,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `docker-compose.yml` for local Postgres; `prisma/seed.ts` and `npm run db:*`
   scripts.
 - **Auth**: email/password accounts, scrypt hashing (Node built-in), stateless
-  signed-cookie sessions, `requireUser()` guard, route middleware, `/login` and
-  `/logout`.
+  signed-cookie sessions, `requireUser()` guard, a route proxy (`src/proxy.ts`),
+  `/login` and `/logout`.
 - **Knowledge** (`/knowledge`): capture headline, expertise, audience, tone,
   topics, and reference material — the `USER_KNOWLEDGE` stage.
 - **Drafts** (`/drafts`, `/drafts/new`, `/drafts/[id]`): create, edit, delete,

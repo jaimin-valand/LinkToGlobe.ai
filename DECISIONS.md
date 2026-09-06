@@ -41,7 +41,7 @@ PUBLISH` gate and state machine now, without taking on integration risk.
 - **Decision:** Passwords hashed with Node's built-in `scrypt` (no native
   module). Sessions are a stateless `payload.hmac` cookie signed with
   `AUTH_SECRET`, httpOnly + SameSite=Lax, 7-day TTL. `SESSION_COOKIE` lives in a
-  crypto-free module so Edge middleware can import it.
+  crypto-free module so the Edge proxy (`src/proxy.ts`) can import it.
 - **Rationale:** No extra dependencies; standard primitives; a DB-backed session
   store (for revocation) can replace `session.ts` without touching callers.
 - **Alternatives:** NextAuth/Auth.js (more than needed now); argon2 (native

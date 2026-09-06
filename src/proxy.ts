@@ -5,10 +5,12 @@ import { SESSION_COOKIE } from "@/server/auth/cookie";
  * Coarse gate: bounce unauthenticated requests for app routes to /login.
  * The real check (HMAC verification + user lookup) happens in the page via
  * requireUser(); this just avoids rendering a protected route shell.
+ *
+ * Next 16 renamed the `middleware` convention to `proxy`.
  */
 const PROTECTED = [/^\/knowledge/, /^\/drafts/, /^\/approvals/, /^\/analytics/];
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (!PROTECTED.some((re) => re.test(pathname))) return NextResponse.next();
 
