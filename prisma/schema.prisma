@@ -1,0 +1,53 @@
+// LinkToGlobe data model — Step 1 foundation.
+//
+// This schema encodes the *shape* of the content pipeline so the rest of the
+// system has a stable contract to build against. It is intentionally small:
+// tables and fields for behavior that does not exist yet are NOT added here.
+// Migrations are not run in Step 1 (no database is provisioned).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Where a piece of content sits in the publishing lifecycle.
+/// Mirrors APPROVAL_LIFECYCLE in src/lib/pipeline.ts.
+enum ApprovalState {
+  DRAFT
+  QUALITY_CHECK
+  USER_APPROVAL
+  PUBLISH
+}
+
+/// A person using LinkToGlobe. Authentication provider details are added in
+/// Phase 1 — this is only the identity anchor other tables reference.
+model User {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  name      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  drafts    ContentDraft[]
+}
+
+/// A single unit of content moving through the pipeline. Body/generation
+/// metadata is deliberately absent until the content engine exists.
+model ContentDraft {
+  id          String        @id @default(cuid())
+  title       String
+  state       ApprovalState @default(DRAFT)
+  authorId    String
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  approvedAt  DateTime?
+  publishedAt DateTime?
+
+  @@index([authorId])
+  @@index([state])
+}
