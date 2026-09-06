@@ -4,6 +4,59 @@ Newest first. Each entry: context, decision, rationale, alternatives, status.
 
 ---
 
+## ADR-0011 — "Publish" is internal-only until an integration exists
+
+- **Context:** Phase 1 needs a terminal state after approval, but external
+  publishing (LinkedIn etc.) is explicitly out of scope and gated on a security
+  review (`SECURITY.md` §6–7).
+- **Decision:** Approving a draft sets `state = PUBLISHED` and `publishedAt`, and
+  writes `draft.published` to the activity log with `destination: "internal"`.
+  No network call leaves the app.
+- **Rationale:** Exercises the full `DRAFT → QUALITY CHECK → USER APPROVAL →
+PUBLISH` gate and state machine now, without taking on integration risk.
+- **Alternatives:** Stop at an `APPROVED` state (less faithful to the pipeline);
+  build a real integration now (blocked by policy + no OAuth app).
+- **Status:** Accepted. Phase 4 adds real destinations behind the `Integration`
+  interface; the approval gate stays mandatory.
+
+## ADR-0010 — AI layer: two providers, "manual" is the default
+
+- **Context:** The product wants AI assistance but must run with zero external
+  dependencies and must never fabricate content silently.
+- **Decision:** One `AiProvider` interface with `manual` (no-op, default) and
+  `anthropic` (Anthropic REST API via `fetch`, no SDK) implementations, chosen
+  by `AI_PROVIDER`. Every AI output is advisory — surfaced in the UI for the
+  user to accept explicitly, never written to a draft automatically. The manual
+  provider returns a "disabled" result rather than any placeholder text.
+- **Rationale:** Keeps the app fully usable offline; keeps model access behind
+  one swappable boundary; keeps the human in control of every word published.
+- **Alternatives:** Hard dependency on one vendor SDK; auto-applying generated
+  text (rejected — violates the no-fabrication rule and the approval model).
+- **Status:** Accepted.
+
+## ADR-0009 — Auth: scrypt + stateless signed-cookie sessions
+
+- **Context:** Phase 1 needs accounts without pulling in a heavy auth framework
+  or a session store on day one.
+- **Decision:** Passwords hashed with Node's built-in `scrypt` (no native
+  module). Sessions are a stateless `payload.hmac` cookie signed with
+  `AUTH_SECRET`, httpOnly + SameSite=Lax, 7-day TTL. `SESSION_COOKIE` lives in a
+  crypto-free module so Edge middleware can import it.
+- **Rationale:** No extra dependencies; standard primitives; a DB-backed session
+  store (for revocation) can replace `session.ts` without touching callers.
+- **Alternatives:** NextAuth/Auth.js (more than needed now); argon2 (native
+  build friction on Windows); DB sessions (added complexity before it pays off).
+- **Status:** Accepted. Revisit when multi-user / SSO lands.
+
+## ADR-0008 — DATABASE_URL and AUTH_SECRET are now required
+
+- **Context:** Phase 0 allowed the app to boot with no database. Phase 1 depends
+  on persistence and sessions.
+- **Decision:** `serverEnvSchema` now requires a PostgreSQL `DATABASE_URL` and a
+  ≥16-char `AUTH_SECRET`; `getServerEnv()` also fails fast if
+  `AI_PROVIDER=anthropic` without `AI_API_KEY`.
+- **Status:** Accepted.
+
 ## ADR-0007 — Prisma pinned to 6.19.3
 
 - **Context:** On the registry today, `prisma@latest` resolves to an `8.x`

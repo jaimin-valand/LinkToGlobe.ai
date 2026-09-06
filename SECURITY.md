@@ -17,36 +17,46 @@ Applies to everyone and every agent working on LinkToGlobe. Rules in
 
 ## 2. Environment variables
 
-| Variable                    | Scope  | Phase | Notes                                   |
-| --------------------------- | ------ | ----- | --------------------------------------- |
-| `NODE_ENV`                  | server | 0     | `development` \| `test` \| `production` |
-| `NEXT_PUBLIC_APP_URL`       | client | 0     | public base URL                         |
-| `DATABASE_URL`              | server | 1     | PostgreSQL only; optional until Phase 1 |
-| `AUTH_SECRET`               | server | 1     | session signing                         |
-| `AI_PROVIDER`, `AI_API_KEY` | server | 2     | AI adapter only                         |
-| `LINKEDIN_CLIENT_ID/SECRET` | server | 4     | OAuth **app** credentials only          |
+| Variable                         | Scope  | Required       | Notes                                                 |
+| -------------------------------- | ------ | -------------- | ----------------------------------------------------- |
+| `NODE_ENV`                       | server | no             | `development` \| `test` \| `production`               |
+| `NEXT_PUBLIC_APP_URL`            | client | no             | public base URL (defaults to `http://localhost:3000`) |
+| `DATABASE_URL`                   | server | **yes**        | PostgreSQL connection string only                     |
+| `AUTH_SECRET`                    | server | **yes**        | ≥16 chars; signs session cookies                      |
+| `AI_PROVIDER`                    | server | no             | `manual` (default) \| `anthropic`                     |
+| `AI_API_KEY`, `AI_MODEL`         | server | if `anthropic` | AI adapter only; never sent to the client             |
+| `SEED_USER_EMAIL` / `_PASSWORD`  | server | no             | dev seed convenience only                             |
+| `LINKEDIN_CLIENT_ID` / `_SECRET` | server | no             | reserved for Phase 4 OAuth **app** credentials only   |
 
 ## 3. Authentication expectations
 
-- First-party auth (Phase 1): hashed passwords (argon2/bcrypt) or a delegated
-  identity provider via OAuth/OIDC. Signed, http-only, `SameSite` session
-  cookies. CSRF protection on state-changing requests.
+- First-party auth (implemented): passwords hashed with `scrypt` (Node built-in,
+  per-password random salt, constant-time verify). Sessions are a stateless
+  HMAC-signed cookie (`AUTH_SECRET`), `httpOnly`, `SameSite=Lax`, `Secure` in
+  production, 7-day TTL. Server Actions are same-origin POSTs (Next.js enforces
+  origin checks); a dedicated CSRF token is a Phase 6 item.
 - **LinkToGlobe never asks for, receives, or stores a user's password for any
   external platform.** Access to external platforms is via that platform's
   official OAuth flow only.
 
 ## 4. Authorization
 
-- Every server action and route handler checks the authenticated user and their
-  right to the specific resource. Default deny.
-- The pipeline's human-gate transitions (notably `→ PUBLISH`) require an
-  authenticated user with an explicit role/permission.
+- Every Server Action and route handler resolves the session via `requireUser()`
+  and scopes every query by `userId`. A draft is only ever loaded with
+  `where: { id, userId }`. Default deny.
+- Lifecycle transitions run through a server-side state machine
+  (`src/server/content/state.ts`). The UI can only _request_ a transition; an
+  illegal one (e.g. `QUALITY_CHECK → PUBLISHED`) throws. Covered by tests.
+- `→ PUBLISHED` is reachable only from `USER_APPROVAL` via an authenticated
+  human action. There is no system path that approves content.
 
 ## 5. Logging
 
 - Never log secrets, tokens, passwords, full request bodies, or PII.
-- Structured logs with severity (Phase 6). Approval and publish events go to an
-  append-only audit log.
+- Every lifecycle action (create, update, submit, quality run, approve, reject,
+  publish, delete) is written to an append-only `ActivityLog` row with the
+  acting `userId`. Tamper-evidence and retention are Phase 6.
+- Structured application logging is Phase 6.
 - Client errors are reported without leaking stack internals to end users.
 
 ## 6. External integrations
@@ -71,10 +81,24 @@ DRAFT → QUALITY CHECK → USER APPROVAL → PUBLISH
 
 - `USER APPROVAL` is a deliberate action by an authenticated human. It cannot be
   auto-approved, defaulted, or satisfied by a system account.
-- The `PUBLISH` state is only reachable from `USER APPROVAL`.
-- Publishing is **not implemented in Step 1 / Phase 0.**
-- When built, the approval → publish path is covered by tests that fail if the
-  gate can be skipped.
+- The `PUBLISHED` state is only reachable from `USER_APPROVAL`. The state machine
+  and its tests fail if this is bypassed.
+- **There is no external publishing.** "Approve & publish" sets the draft to
+  `PUBLISHED` and records the approval in the activity log — nothing leaves the
+  application. See ADR-0011.
+- Adding a real destination (Phase 4) requires: official API + OAuth only, no
+  stored end-user platform passwords or cookies, per-destination policy checks,
+  and the approval gate unchanged.
+
+## 7a. AI usage
+
+- Model access is confined to `src/server/ai`. The default provider (`manual`)
+  makes no external calls.
+- AI output is **advisory only** — shown in the editor for the user to accept
+  explicitly. It is never written into a draft, submitted, or published
+  automatically. The human approves every word that reaches `PUBLISHED`.
+- Prompts instruct the model not to invent statistics, quotes, or sources; the
+  deterministic quality engine independently flags unsupported claims.
 
 ## 8. Dependencies
 

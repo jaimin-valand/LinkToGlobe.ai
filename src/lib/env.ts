@@ -8,22 +8,26 @@ import { z } from "zod";
  *    They must never be imported into a Client Component.
  *  - Anything the browser may see MUST be prefixed `NEXT_PUBLIC_` and declared
  *    in `clientSchema`. `isPublicEnvKey()` enforces that boundary in tests.
- *
- * Step 1 keeps the required surface minimal on purpose — no integration
- * credentials are wired up yet.
  */
 
 const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  // Optional in Step 1 so `npm run build` works without a database.
-  // Becomes required in Phase 1 when persistence lands.
+
   DATABASE_URL: z
     .string()
-    .url()
+    .min(1, "DATABASE_URL is required")
     .refine((v) => v.startsWith("postgres://") || v.startsWith("postgresql://"), {
       message: "DATABASE_URL must be a PostgreSQL connection string",
-    })
-    .optional(),
+    }),
+
+  AUTH_SECRET: z.string().min(16, "AUTH_SECRET must be at least 16 characters"),
+
+  AI_PROVIDER: z.enum(["manual", "anthropic"]).default("manual"),
+  AI_API_KEY: z.string().optional(),
+  AI_MODEL: z.string().default("claude-sonnet-5"),
+
+  SEED_USER_EMAIL: z.string().email().optional(),
+  SEED_USER_PASSWORD: z.string().min(8).optional(),
 });
 
 const clientSchema = z.object({
@@ -46,6 +50,11 @@ export function getServerEnv(): ServerEnv {
   const parsed = serverSchema.safeParse(process.env);
   if (!parsed.success) {
     throw new Error(`Invalid server environment configuration:\n${format(parsed.error)}`);
+  }
+  if (parsed.data.AI_PROVIDER === "anthropic" && !parsed.data.AI_API_KEY) {
+    throw new Error(
+      "Invalid server environment configuration:\n  - AI_API_KEY: required when AI_PROVIDER=anthropic",
+    );
   }
   cachedServer = parsed.data;
   return cachedServer;

@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
 import { site } from "@/config/site";
+import { getCurrentUser } from "@/server/auth";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -24,7 +25,9 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const user = await getCurrentUser().catch(() => null);
+
   return (
     <html
       lang="en"
@@ -32,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <body className="min-h-full" suppressHydrationWarning>
-        <AppShell>{children}</AppShell>
+        <AppShell user={user ? { email: user.email, name: user.name } : null}>{children}</AppShell>
       </body>
     </html>
   );

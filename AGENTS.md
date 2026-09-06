@@ -27,7 +27,9 @@ QUALITY REVIEW → USER APPROVAL → SCHEDULE / PUBLISH → ANALYTICS → LEARNI
 ```
 
 See `ARCHITECTURE.md` for module boundaries and `ROADMAP.md` for phasing.
-**We are in Phase 0 (Foundation).** Do not build later phases ahead of schedule.
+**We are in Phase 1 (Core MVP), with early Phase 2 AI assist.** Do not build
+later phases ahead of schedule. Do not add external publishing or any platform
+integration without the security review in `SECURITY.md` §6–7.
 
 ## 2. Architecture principles
 
@@ -47,18 +49,21 @@ See `ARCHITECTURE.md` for module boundaries and `ROADMAP.md` for phasing.
 
 ## 3. Development commands
 
-| Command                           | Purpose                                   |
-| --------------------------------- | ----------------------------------------- |
-| `npm run dev`                     | Local dev server                          |
-| `npm run build`                   | Production build (must pass before merge) |
-| `npm run start`                   | Serve the production build                |
-| `npm run lint`                    | ESLint (must pass, zero warnings)         |
-| `npm run typecheck`               | `tsc --noEmit` (must pass)                |
-| `npm test`                        | Vitest unit tests (must pass)             |
-| `npm run test:watch`              | Vitest in watch mode                      |
-| `npm run test:e2e`                | Playwright end-to-end tests               |
-| `npm run format` / `format:check` | Prettier write / verify                   |
-| `npm run db:generate`             | Regenerate the Prisma client              |
+| Command                            | Purpose                                   |
+| ---------------------------------- | ----------------------------------------- |
+| `npm run dev`                      | Local dev server                          |
+| `npm run build`                    | Production build (must pass before merge) |
+| `npm run start`                    | Serve the production build                |
+| `npm run lint`                     | ESLint (must pass, zero warnings)         |
+| `npm run typecheck`                | `tsc --noEmit` (must pass)                |
+| `npm test`                         | Vitest unit tests (must pass)             |
+| `npm run test:watch`               | Vitest in watch mode                      |
+| `npm run test:e2e`                 | Playwright end-to-end tests               |
+| `npm run format` / `format:check`  | Prettier write / verify                   |
+| `npm run db:deploy` / `db:migrate` | Apply / create migrations                 |
+| `npm run db:seed` / `db:studio`    | Seed dev account / browse data            |
+
+Local Postgres: `docker compose up -d` (matches the default `DATABASE_URL`).
 
 ## 4. Testing requirements
 

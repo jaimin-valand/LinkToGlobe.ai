@@ -82,22 +82,22 @@ flowchart LR
 
 ## 4. Major modules
 
-| Module                   | Path (target)               | Responsibility                                   | Phase                   |
-| ------------------------ | --------------------------- | ------------------------------------------------ | ----------------------- |
-| Frontend                 | `src/app`, `src/components` | App Router UI, layout, design system             | 0 _(shell implemented)_ |
-| Config / env             | `src/lib/env.ts`            | Zod-validated environment, server/client split   | 0 _(implemented)_       |
-| Pipeline model           | `src/lib/pipeline.ts`       | Stage + lifecycle definitions                    | 0 _(implemented)_       |
-| Database                 | `prisma/`, `src/lib/db.ts`  | Schema, migrations, Prisma client                | 1 _(schema drafted)_    |
-| Auth                     | `src/server/auth`           | Sessions, user identity                          | 1                       |
-| Domain services          | `src/server/*`              | Orchestrate pipeline stages                      | 1+                      |
-| AI provider layer        | `src/server/ai`             | One adapter, provider-agnostic                   | 2                       |
-| Content engine           | `src/server/content`        | Ideas → hooks → drafts                           | 2                       |
-| Research / signal engine | `src/server/research`       | Sources, signal detection                        | 2                       |
-| Quality review           | `src/server/quality`        | Accuracy / originality / policy checks           | 2                       |
-| Analytics                | `src/server/analytics`      | Ingest + aggregate performance data              | 3                       |
-| Integrations             | `src/server/integrations/*` | Publishing destinations behind one interface     | 4                       |
-| Automation               | `src/server/automation`     | Scheduling, recurring jobs                       | 5                       |
-| Security / audit         | cross-cutting               | AuthZ, audit log, rate limiting, secret handling | all; hardened in 6      |
+| Module                          | Path                        | Responsibility                                 | Status                     |
+| ------------------------------- | --------------------------- | ---------------------------------------------- | -------------------------- |
+| Frontend                        | `src/app`, `src/components` | App Router UI, layout, design system           | implemented                |
+| Config / env                    | `src/lib/env.ts`            | Zod-validated environment, server/client split | implemented                |
+| Pipeline model                  | `src/lib/pipeline.ts`       | Stage + lifecycle definitions                  | implemented                |
+| Database                        | `prisma/`, `src/lib/db.ts`  | Schema, migrations, Prisma client              | implemented                |
+| Auth                            | `src/server/auth`           | scrypt hashing, signed-cookie sessions, guards | implemented                |
+| Knowledge                       | `src/server/knowledge`      | Capture the user's professional context        | implemented                |
+| Content service + state machine | `src/server/content`        | CRUD + server-enforced lifecycle transitions   | implemented                |
+| Quality engine                  | `src/server/quality`        | Deterministic pre-publish checks               | implemented                |
+| AI provider layer               | `src/server/ai`             | One adapter (`manual` / `anthropic`), advisory | implemented                |
+| Analytics                       | `src/server/analytics`      | Real counts, approval rate, activity feed      | Phase-1 subset             |
+| Research / signal engine        | `src/server/research`       | External sources, signal detection             | planned (Phase 2)          |
+| Integrations                    | `src/server/integrations/*` | Publishing destinations behind one interface   | planned (Phase 4)          |
+| Automation                      | `src/server/automation`     | Scheduling, recurring jobs                     | planned (Phase 5)          |
+| Security / audit                | `src/server/*`, ActivityLog | AuthZ per query, append-only lifecycle log     | basic; hardened in Phase 6 |
 
 ## 5. Data flow (target)
 

@@ -8,9 +8,10 @@ export const site = {
     "LinkToGlobe turns your professional knowledge into researched, quality-reviewed content — with an explicit human approval step before anything is published.",
   nav: [
     { label: "Overview", href: "/" },
-    { label: "Pipeline", href: "/pipeline" },
-    { label: "Approvals", href: "/approvals" },
-    { label: "Analytics", href: "/analytics" },
+    { label: "Knowledge", href: "/knowledge", auth: true },
+    { label: "Drafts", href: "/drafts", auth: true },
+    { label: "Approvals", href: "/approvals", auth: true },
+    { label: "Analytics", href: "/analytics", auth: true },
   ],
 } as const;
 

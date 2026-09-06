@@ -9,6 +9,13 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Dummy values — CI runs unit tests and a dynamic build, neither of which
+  # connects to a database. Integration tests (Phase 2+) will add a service.
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+  AUTH_SECRET: ci-only-secret-value-at-least-16-chars
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -36,5 +43,3 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          NEXT_PUBLIC_APP_URL: http://localhost:3000

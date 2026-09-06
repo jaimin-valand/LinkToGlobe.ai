@@ -1,7 +1,7 @@
 # LinkToGlobe — Roadmap
 
 Phases are sequential. Nothing below is "done" until it is built, tested, and
-merged. **Current phase: Phase 0.**
+merged. **Current phase: Phase 1 (in progress).**
 
 Legend: `[ ]` not started · `[~]` in progress · `[x]` complete
 
@@ -20,19 +20,26 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` complete
 
 ## Phase 1 — Core MVP
 
-- [ ] PostgreSQL + Prisma migrations wired up
-- [ ] Authentication and user accounts
-- [ ] Capture "user knowledge" (profile, expertise, source material)
-- [ ] Manual content draft CRUD
-- [ ] Approval queue UI implementing `DRAFT → QUALITY CHECK → USER APPROVAL`
-- [ ] No external publishing yet — approval ends at an internal "approved" state
+- [x] PostgreSQL + Prisma schema and migrations (`prisma/migrations`)
+- [x] Authentication and user accounts (scrypt hashing, signed-cookie sessions)
+- [x] Capture "user knowledge" (headline, expertise, audience, tone, topics, sources)
+- [x] Content draft CRUD
+- [x] Deterministic quality engine (`src/server/quality`) gating progression
+- [x] Approval queue implementing `DRAFT → QUALITY CHECK → USER APPROVAL → PUBLISHED`,
+      with a server-enforced state machine and `REJECTED` off-ramp
+- [x] Append-only activity log for every lifecycle action
+- [x] No external publishing — "publish" records approval internally only
+- [ ] Multi-user roles / team review (only single-owner today)
+- [ ] Draft version history
 
 ## Phase 2 — Content Intelligence
 
-- [ ] AI provider adapter (provider-agnostic)
-- [ ] Research + signal engine (attributed sources only)
-- [ ] Ideas → hooks → draft generation
-- [ ] Automated quality review (accuracy, originality, policy fit)
+- [x] AI provider adapter (provider-agnostic; `manual` + `anthropic`)
+- [x] AI-assisted ideas → hooks → draft body (advisory; never auto-applied)
+- [x] AI-assisted editorial review (advisory, alongside the deterministic engine)
+- [ ] Research + signal engine (attributed external sources)
+- [ ] Originality / plagiarism checks
+- [ ] Policy-fit checks per destination
 
 ## Phase 3 — Analytics
 
@@ -55,7 +62,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` complete
 
 ## Phase 6 — Production Hardening
 
-- [ ] Append-only audit log for approvals and publishes
+- [~] Append-only audit log (basic `ActivityLog` exists; needs tamper-evidence + retention)
 - [ ] Observability (structured logs, metrics, tracing, error reporting)
 - [ ] Security review, dependency and secret scanning in CI
 - [ ] Backup / restore and incident runbooks

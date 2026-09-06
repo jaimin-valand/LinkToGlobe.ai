@@ -2,10 +2,14 @@
 
 **Connect professional knowledge, ideas, and content to the wider world.**
 
-LinkToGlobe turns a professional's knowledge into researched, quality-reviewed
-content — and publishes it externally only after an explicit human approval
-step. This repository is at **Phase 0: Foundation & Architecture**. The
-application shell runs; the pipeline is not built yet.
+LinkToGlobe turns a professional's knowledge into quality-reviewed content —
+and only marks it published after an explicit human approval step. This
+repository is at **Phase 1: Core MVP** (with early Phase 2 AI assistance).
+
+**Working today:** accounts, knowledge capture, draft authoring, a deterministic
+quality engine, a server-enforced approval workflow, an activity log, real
+analytics, and optional AI assistance. **Not built:** external research/signals,
+scheduling, any external publishing, and the analytics learning loop.
 
 ## The pipeline
 
@@ -14,8 +18,10 @@ USER KNOWLEDGE → RESEARCH → SIGNALS → IDEAS → HOOKS → CONTENT →
 QUALITY REVIEW → USER APPROVAL → SCHEDULE / PUBLISH → ANALYTICS → LEARNING
 ```
 
-Every externally published item must pass `DRAFT → QUALITY CHECK →
-USER APPROVAL → PUBLISH`. See [`SECURITY.md`](./SECURITY.md).
+Content moves through a server-enforced state machine
+`DRAFT → QUALITY_CHECK → USER_APPROVAL → PUBLISHED` (with `REJECTED` as an
+off-ramp). `PUBLISHED` is reachable only via a human approval. There is no
+external publishing — see [`SECURITY.md`](./SECURITY.md) and ADR-0011.
 
 ## Tech stack
 
@@ -34,25 +40,54 @@ Rationale and alternatives considered: [`DECISIONS.md`](./DECISIONS.md).
 
 ## Getting started
 
+You need Node ≥ 20.9 and a PostgreSQL database.
+
 ```bash
 npm install
 cp .env.example .env
+```
+
+**Get a database** — either:
+
+- **Docker** (local): `docker compose up -d` — starts Postgres matching the
+  default `DATABASE_URL` in `.env.example`.
+- **Hosted**: create a free Postgres (e.g. Neon, Supabase) and paste its
+  connection string into `.env` as `DATABASE_URL`.
+
+**Then set up the schema and a dev account:**
+
+```bash
+# generate AUTH_SECRET and put it in .env:
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+npm run db:deploy   # apply migrations
+npm run db:seed     # create the SEED_USER_EMAIL / SEED_USER_PASSWORD account
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000 and sign in (or register a new account).
+
+### Optional: AI assistance
+
+Set `AI_PROVIDER=anthropic` and `AI_API_KEY=...` in `.env`. Without it the app
+runs fully — you just write drafts yourself. AI output is always advisory and
+never applied without a click.
 
 ## Scripts
 
-| Command                                   | Purpose                  |
-| ----------------------------------------- | ------------------------ |
-| `npm run dev`                             | Dev server               |
-| `npm run build` / `npm run start`         | Production build / serve |
-| `npm run lint` / `npm run typecheck`      | Static checks            |
-| `npm test` / `npm run test:watch`         | Unit tests               |
-| `npm run test:e2e`                        | Playwright E2E           |
-| `npm run format` / `npm run format:check` | Prettier                 |
-| `npm run db:generate`                     | Regenerate Prisma client |
+| Command                                   | Purpose                     |
+| ----------------------------------------- | --------------------------- |
+| `npm run dev`                             | Dev server                  |
+| `npm run build` / `npm run start`         | Production build / serve    |
+| `npm run lint` / `npm run typecheck`      | Static checks               |
+| `npm test` / `npm run test:watch`         | Unit tests                  |
+| `npm run test:e2e`                        | Playwright E2E              |
+| `npm run format` / `npm run format:check` | Prettier                    |
+| `npm run db:deploy`                       | Apply migrations            |
+| `npm run db:migrate`                      | Create a migration (dev)    |
+| `npm run db:seed`                         | Seed the dev account        |
+| `npm run db:studio`                       | Prisma Studio (browse data) |
+| `npm run db:reset`                        | Drop, re-migrate, re-seed   |
 
 ## Documentation
 
