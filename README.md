@@ -2,14 +2,17 @@
 
 **Connect professional knowledge, ideas, and content to the wider world.**
 
-LinkToGlobe.ai turns a professional's knowledge into quality-reviewed content —
+LinkToGlobe.ai turns a professional's knowledge into quality-reviewed content
 and only marks it published after an explicit human approval step. This
-repository is at **Phase 1: Core MVP** (with early Phase 2 AI assistance).
+repository is at **Phase 1 (Core MVP)** with the **first slice of Phase 2
+(research intelligence)** in place.
 
-**Working today:** accounts, knowledge capture, draft authoring, a deterministic
+**Working today:** accounts, knowledge capture, a research flow (search →
+clusters → signals → relevance → save as idea), draft authoring, a deterministic
 quality engine, a server-enforced approval workflow, an activity log, real
-analytics, and optional AI assistance. **Not built:** external research/signals,
-scheduling, any external publishing, and the analytics learning loop.
+internal analytics, and optional AI assistance (Anthropic / OpenAI / Gemini).
+**Not built:** persistent scheduling, external publishing, companies/people,
+autopilot, and the analytics learning loop.
 
 ## The pipeline
 
@@ -76,12 +79,18 @@ Every external service is optional and set through `.env` (see `.env.example`).
 The app runs with none of them, and `/settings/integrations` shows the live
 state of each one.
 
-- **AI** — set `AI_PROVIDER=anthropic` + `AI_API_KEY`, or `AI_PROVIDER=openai` +
-  `OPENAI_API_KEY`. Without it you write drafts yourself. AI output is always
-  advisory and never applied without a click.
-- **Research, LinkedIn, email, company data, calendar** — variable names are in
-  `.env.example`. These are boundary-only today: the config and status page
-  exist, the client code lands in later phases.
+- **AI** — set `AI_PROVIDER` to `anthropic` (+ `AI_API_KEY`), `openai` (+
+  `OPENAI_API_KEY`), or `gemini` (+ `GEMINI_API_KEY`), and `AI_MODEL` to a model
+  that provider supports. Without it you write drafts yourself. AI output is
+  always advisory and never applied without a click.
+- **Research** — set `RESEARCH_PROVIDER=tavily` (+ `RESEARCH_API_KEY`) or
+  `RESEARCH_PROVIDER=google` (+ `RESEARCH_API_KEY` and `RESEARCH_GOOGLE_CX`).
+  Without it the Research page shows a clear "not configured" panel. For local
+  work you can use `RESEARCH_PROVIDER=fixture` (deterministic placeholder
+  results; refused in production).
+- **LinkedIn, email, company data, calendar** — variable names are in
+  `.env.example`. Boundary-only today: config and status page exist, client
+  code lands in later phases.
 
 ## Scripts
 

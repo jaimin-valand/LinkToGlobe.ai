@@ -8,7 +8,15 @@ import { SESSION_COOKIE } from "@/server/auth/cookie";
  *
  * Next 16 renamed the `middleware` convention to `proxy`.
  */
-const PROTECTED = [/^\/knowledge/, /^\/drafts/, /^\/approvals/, /^\/analytics/, /^\/settings/];
+const PROTECTED = [
+  /^\/knowledge/,
+  /^\/research/,
+  /^\/ideas/,
+  /^\/drafts/,
+  /^\/approvals/,
+  /^\/analytics/,
+  /^\/settings/,
+];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -26,6 +34,8 @@ export function proxy(req: NextRequest) {
 export const config = {
   matcher: [
     "/knowledge/:path*",
+    "/research/:path*",
+    "/ideas/:path*",
     "/drafts/:path*",
     "/approvals/:path*",
     "/analytics/:path*",

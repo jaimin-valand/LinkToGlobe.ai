@@ -66,3 +66,4 @@ desktop.ini
 # misc
 *.pem
 *.tsbuildinfo
+/e2e/.auth

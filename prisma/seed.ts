@@ -17,12 +17,15 @@ async function main() {
     return;
   }
 
+  // Dev seed: keep the account's password in sync with SEED_USER_PASSWORD so
+  // `npm run db:seed` is a reliable "reset my local login" for development.
+  const passwordHash = hashPassword(password);
   const user = await prisma.user.upsert({
     where: { email: email.toLowerCase() },
-    update: {},
+    update: { passwordHash },
     create: {
       email: email.toLowerCase(),
-      passwordHash: hashPassword(password),
+      passwordHash,
       name: "Dev User",
       knowledge: {
         create: {

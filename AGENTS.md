@@ -39,7 +39,11 @@ integration without the security review in `SECURITY.md` §6–7.
 - **The pipeline is data, not hardcoded flow.** `src/lib/pipeline.ts` is the
   single source of truth for stage order. Keep DB enums and docs in sync with it.
 - **Provider-agnostic AI layer.** All model calls go through `src/server/ai`
-  (`manual` / `anthropic` / `openai`). No vendor SDK in the dependency tree.
+  (`manual` / `anthropic` / `openai` / `gemini`). No vendor SDK in the tree.
+- **Provider-agnostic research layer.** `src/server/research/` — the analysis
+  (dedupe, clustering, relevance, signals) is deterministic and provider-neutral;
+  vendor code stays in `providers/`. Never fabricate sources, citations, or
+  facts; never scrape. A signal that is an inference is marked `INFERENCE`.
 - **Integrations are declared, then built.** `src/server/integrations/registry.ts`
   lists every external connection with its required env vars. Adding a provider
   is a new folder plus a registry line. Every integration is optional; an

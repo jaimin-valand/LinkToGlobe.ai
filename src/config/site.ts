@@ -9,6 +9,8 @@ export const site = {
   nav: [
     { label: "Overview", href: "/" },
     { label: "Knowledge", href: "/knowledge", auth: true },
+    { label: "Research", href: "/research", auth: true },
+    { label: "Ideas", href: "/ideas", auth: true },
     { label: "Drafts", href: "/drafts", auth: true },
     { label: "Approvals", href: "/approvals", auth: true },
     { label: "Analytics", href: "/analytics", auth: true },

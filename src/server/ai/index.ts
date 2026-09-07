@@ -2,6 +2,7 @@ import "server-only";
 import { getServerEnv } from "@/lib/env";
 import { createAnthropicProvider } from "./anthropic";
 import { createOpenAiProvider } from "./openai";
+import { createGeminiProvider } from "./gemini";
 import { manualProvider } from "./manual";
 import type { AiProvider } from "./types";
 
@@ -20,6 +21,8 @@ export function getAi(): AiProvider {
     cached = createAnthropicProvider({ apiKey: env.AI_API_KEY, model: env.AI_MODEL });
   } else if (env.AI_PROVIDER === "openai" && env.OPENAI_API_KEY) {
     cached = createOpenAiProvider({ apiKey: env.OPENAI_API_KEY, model: env.AI_MODEL });
+  } else if (env.AI_PROVIDER === "gemini" && env.GEMINI_API_KEY) {
+    cached = createGeminiProvider({ apiKey: env.GEMINI_API_KEY, model: env.AI_MODEL });
   } else {
     cached = manualProvider;
   }
