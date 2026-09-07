@@ -6,6 +6,28 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — idea to draft
+
+- **Turn an idea into a draft.** The `/ideas/[id]` page has a "Turn into draft"
+  action that creates a `DRAFT` `ContentDraft` from the idea: the idea's angle
+  becomes the hook, its notes and source URLs carry into the draft's source
+  notes, and the body is left for you to write. The draft opens in the existing
+  editor and moves through the unchanged `DRAFT → QUALITY_CHECK → USER_APPROVAL
+  → PUBLISHED` state machine.
+- **Idempotent.** An idea maps to at most one draft (`ContentDraft.originIdeaId`
+  is unique). Converting again opens the existing draft. Converting a `NEW` idea
+  moves it to `IN_PROGRESS`.
+- **Provenance both ways.** The draft shows "From idea …"; the idea shows the
+  draft and its current state.
+- **Prisma** — migration `20260907120000_idea_to_draft`: one nullable
+  `ContentDraft.originIdeaId` with a unique index and a `SET NULL` foreign key.
+  Additive; existing tables and rows untouched.
+- Activity log gains `idea.converted`; the analytics feed labels
+  `research.completed`, `idea.saved` and `idea.converted`.
+- New unit tests for `createDraftFromIdea` (mapping, idempotency, status change,
+  ownership scoping, field clamping); the fixture-provider E2E now continues
+  from a saved idea through to an opened draft.
+
 ### Added — research intelligence (Phase 2, first slice)
 
 - **Flow**: `query → ResearchRun → sources → clusters → signals → relevance →

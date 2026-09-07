@@ -8,9 +8,10 @@ repository is at **Phase 1 (Core MVP)** with the **first slice of Phase 2
 (research intelligence)** in place.
 
 **Working today:** accounts, knowledge capture, a research flow (search →
-clusters → signals → relevance → save as idea), draft authoring, a deterministic
-quality engine, a server-enforced approval workflow, an activity log, real
-internal analytics, and optional AI assistance (Anthropic / OpenAI / Gemini).
+clusters → signals → relevance → save as idea → turn into a draft), draft
+authoring, a deterministic quality engine, a server-enforced approval workflow,
+an activity log, real internal analytics, and optional AI assistance
+(Anthropic / OpenAI / Gemini).
 **Not built:** persistent scheduling, external publishing, companies/people,
 autopilot, and the analytics learning loop.
 

@@ -19,6 +19,9 @@ const ACTION_LABELS: Record<string, string> = {
   "draft.rejected": "Sent back",
   "draft.returned": "Returned to draft",
   "knowledge.saved": "Knowledge updated",
+  "research.completed": "Research run completed",
+  "idea.saved": "Idea saved",
+  "idea.converted": "Idea turned into draft",
 };
 
 function Stat({ label, value }: { label: string; value: string }) {

@@ -45,7 +45,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` complete
   - [x] Content opportunity view + save as `Idea`
   - [ ] AI-assisted cluster summaries / angles (seam exists; deterministic today)
   - [ ] Signal history / re-run comparison, saved searches
-  - [ ] Turn an `Idea` directly into a `ContentDraft`
+  - [x] Turn an `Idea` directly into a `ContentDraft`
 - [ ] Originality / plagiarism checks
 - [ ] Policy-fit checks per destination
 

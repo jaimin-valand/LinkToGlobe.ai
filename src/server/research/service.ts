@@ -385,7 +385,10 @@ export function listIdeas(userId: string, take = 50) {
 export async function getIdea(userId: string, id: string) {
   const idea = await prisma.idea.findFirst({
     where: { id, userId },
-    include: { signal: { select: { id: true, runId: true } } },
+    include: {
+      signal: { select: { id: true, runId: true } },
+      draft: { select: { id: true, state: true } },
+    },
   });
   if (!idea) throw new NotFoundError("Idea not found.");
   return idea;

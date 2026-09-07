@@ -4,6 +4,27 @@ Newest first. Each entry: context, decision, rationale, alternatives, status.
 
 ---
 
+## ADR-0017 — Idea → draft is a one-way seed, not a live link
+
+- **Context:** Research produces `Idea`s; the content pipeline starts at a
+  `ContentDraft`. The two need connecting without coupling the research analysis
+  to the publishing state machine.
+- **Decision:** "Turn into draft" copies the idea's fields into a new `DRAFT`
+  once: `title → title`, `angle → hook`, `notes` + `sourceUrls → sourceNotes`.
+  The body is never pre-filled. `ContentDraft.originIdeaId` is a unique nullable
+  column, so an idea has at most one draft and re-converting is idempotent.
+  Converting a `NEW` idea moves it to `IN_PROGRESS`. After creation the two
+  records are independent — editing the draft does not touch the idea, and the
+  idea is kept only for provenance and its sources.
+- **Rationale:** The draft is the unit of work from that point on. A live
+  binding would raise questions the product does not need yet (what does editing
+  the idea do to an approved draft?). The state machine and quality engine are
+  unchanged.
+- **Alternatives:** A live idea↔draft binding (premature coupling); generating
+  body text from the idea via AI on conversion (rejected — the body stays a
+  human decision, and AI assist is already available inside the editor).
+- **Status:** Accepted.
+
 ## ADR-0016 — Research provider abstraction; Tavily + Google Programmable Search
 
 - **Context:** Research needs current, citable sources. The domain must not be

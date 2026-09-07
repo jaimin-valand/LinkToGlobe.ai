@@ -90,7 +90,7 @@ flowchart LR
 | Database                        | `prisma/`, `src/lib/db.ts`  | Schema, migrations, Prisma client                              | implemented                |
 | Auth                            | `src/server/auth`           | scrypt hashing, signed-cookie sessions, guards                 | implemented                |
 | Knowledge                       | `src/server/knowledge`      | Capture the user's professional context                        | implemented                |
-| Content service + state machine | `src/server/content`        | CRUD + server-enforced lifecycle transitions                   | implemented                |
+| Content service + state machine | `src/server/content`        | CRUD, `Idea → draft` seed, server-enforced lifecycle           | implemented                |
 | Quality engine                  | `src/server/quality`        | Deterministic pre-publish checks                               | implemented                |
 | AI provider layer               | `src/server/ai`             | One adapter (`manual`/`anthropic`/`openai`/`gemini`), advisory | implemented                |
 | Analytics                       | `src/server/analytics`      | Real counts, approval rate, activity feed                      | Phase-1 subset             |

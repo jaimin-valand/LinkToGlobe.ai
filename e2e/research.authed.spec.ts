@@ -39,6 +39,20 @@ test("fixture provider results can be produced, explained, and saved as an idea"
   await expect(page).toHaveURL(/\/ideas\/\w+$/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByText("Suggested angle")).toBeVisible();
+
+  // The idea can be turned into a draft, which opens in Draft with a link back.
+  const ideaUrl = page.url();
+  await page.getByRole("button", { name: "Turn into draft" }).click();
+  await expect(page).toHaveURL(/\/drafts\/\w+$/, { timeout: 30_000 });
+  await expect(page.getByText("Draft", { exact: true })).toBeVisible();
+  const provenance = page.locator("p", { hasText: "From idea" });
+  await expect(provenance).toBeVisible();
+
+  // Back on the idea, the button is replaced by a link to the draft.
+  await provenance.getByRole("link").click();
+  await expect(page).toHaveURL(ideaUrl, { timeout: 30_000 });
+  await expect(page.getByRole("link", { name: "Open the draft" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Turn into draft" })).toHaveCount(0);
 });
 
 test("an over-short query does not start a run", async ({ page }) => {
