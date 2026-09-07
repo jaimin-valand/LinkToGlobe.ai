@@ -28,14 +28,18 @@ const serverSchema = z.object({
   AUTH_SECRET: z.string().min(16, "AUTH_SECRET must be at least 16 characters"),
 
   // ── AI provider (optional; defaults to the no-op "manual" provider) ─────────
-  AI_PROVIDER: z.enum(["manual", "anthropic", "openai"]).default("manual"),
+  AI_PROVIDER: z.enum(["manual", "anthropic", "openai", "gemini"]).default("manual"),
   AI_MODEL: z.string().default("claude-sonnet-5"),
   AI_API_KEY: z.string().optional(), // Anthropic
   OPENAI_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
 
-  // ── Research / search provider (optional; boundary only, not implemented) ───
+  // ── Research / search provider (optional) ──────────────────────────────────
+  //   tavily  -> RESEARCH_API_KEY
+  //   google  -> RESEARCH_API_KEY + RESEARCH_GOOGLE_CX (Programmable Search id)
   RESEARCH_PROVIDER: z.string().optional(),
   RESEARCH_API_KEY: z.string().optional(),
+  RESEARCH_GOOGLE_CX: z.string().optional(),
 
   // ── LinkedIn official OAuth app (optional; boundary only) ───────────────────
   LINKEDIN_CLIENT_ID: z.string().optional(),
@@ -92,6 +96,11 @@ export function getServerEnv(): ServerEnv {
   if (parsed.data.AI_PROVIDER === "openai" && !parsed.data.OPENAI_API_KEY) {
     throw new Error(
       "Invalid server environment configuration:\n  - OPENAI_API_KEY: required when AI_PROVIDER=openai",
+    );
+  }
+  if (parsed.data.AI_PROVIDER === "gemini" && !parsed.data.GEMINI_API_KEY) {
+    throw new Error(
+      "Invalid server environment configuration:\n  - GEMINI_API_KEY: required when AI_PROVIDER=gemini",
     );
   }
   cachedServer = parsed.data;

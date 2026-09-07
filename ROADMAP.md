@@ -34,10 +34,18 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` complete
 
 ## Phase 2 — Content Intelligence
 
-- [x] AI provider adapter (provider-agnostic; `manual` + `anthropic`)
+- [x] AI provider adapter (provider-agnostic; `manual` / `anthropic` / `openai` / `gemini`)
 - [x] AI-assisted ideas → hooks → draft body (advisory; never auto-applied)
 - [x] AI-assisted editorial review (advisory, alongside the deterministic engine)
-- [ ] Research + signal engine (attributed external sources)
+- [~] Research + signal engine (attributed external sources)
+  - [x] Provider abstraction + Tavily and Google Programmable Search adapters
+  - [x] Source collection, canonical-URL dedupe, deterministic story clustering
+  - [x] Signal extraction with source traceability + inference marking
+  - [x] Transparent relevance scoring against `KnowledgeProfile`
+  - [x] Content opportunity view + save as `Idea`
+  - [ ] AI-assisted cluster summaries / angles (seam exists; deterministic today)
+  - [ ] Signal history / re-run comparison, saved searches
+  - [ ] Turn an `Idea` directly into a `ContentDraft`
 - [ ] Originality / plagiarism checks
 - [ ] Policy-fit checks per destination
 

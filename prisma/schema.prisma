@@ -28,6 +28,35 @@ enum ContentState {
   REJECTED
 }
 
+/// Lifecycle of one research run against a provider.
+enum ResearchRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+/// The kind of thing a signal points at.
+enum SignalKind {
+  CHANGE // something moved or was announced
+  RECURRING // the same point keeps coming up
+  UNUSUAL // an outlier vs the rest of the coverage
+  RISING // gaining attention (volume / recency)
+  GAP // something the coverage seems to be missing
+}
+
+/// Whether a signal restates a source or is our own inference from several.
+enum EvidenceKind {
+  DIRECT
+  INFERENCE
+}
+
+enum IdeaStatus {
+  NEW
+  IN_PROGRESS
+  ARCHIVED
+}
+
 model User {
   id           String            @id @default(cuid())
   email        String            @unique
@@ -39,6 +68,11 @@ model User {
   knowledge    KnowledgeProfile?
   drafts       ContentDraft[]
   activity     ActivityLog[]
+  researchRuns ResearchRun[]
+  sources      ResearchSource[]
+  clusters     StoryCluster[]
+  signals      Signal[]
+  ideas        Idea[]
 }
 
 /// The user's professional context — the "USER KNOWLEDGE" pipeline stage.
@@ -105,4 +139,128 @@ model ActivityLog {
 
   @@index([draftId])
   @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Research intelligence
+//
+//   query -> ResearchRun -> ResearchSource(s) -> StoryCluster(s) -> Signal(s)
+//   -> (relevance to KnowledgeProfile) -> opportunity view -> saved Idea
+//
+// Everything is user-owned. See src/server/research/.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// One search against a research provider, plus the derived analysis.
+model ResearchRun {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  query        String            @db.Text
+  provider     String
+  status       ResearchRunStatus @default(PENDING)
+  error        String?           @db.Text
+  sourceCount  Int               @default(0)
+  clusterCount Int               @default(0)
+  signalCount  Int               @default(0)
+  createdAt    DateTime          @default(now())
+  completedAt  DateTime?
+  sources      ResearchSource[]
+  clusters     StoryCluster[]
+  signals      Signal[]
+
+  @@index([userId, createdAt])
+  @@index([userId, status])
+}
+
+/// A normalised source returned by a provider for a run.
+model ResearchSource {
+  id               String        @id @default(cuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runId            String
+  run              ResearchRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
+  clusterId        String?
+  cluster          StoryCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  canonicalUrl     String        @db.Text
+  urlHash          String
+  title            String        @db.Text
+  publisher        String?
+  author           String?
+  publishedAt      DateTime?
+  excerpt          String        @default("") @db.Text
+  provider         String
+  providerSourceId String?
+  relevanceScore   Int? // 0-100 relevance of this source to the user
+  relevanceReasons Json?
+  metadata         Json?
+  retrievedAt      DateTime      @default(now())
+  createdAt        DateTime      @default(now())
+
+  @@unique([runId, urlHash]) // dedupe within a run by canonical URL
+  @@index([userId, createdAt])
+  @@index([runId])
+  @@index([clusterId])
+}
+
+/// A group of sources that appear to cover the same underlying story.
+model StoryCluster {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runId     String
+  run       ResearchRun      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  title     String           @db.Text
+  summary   String           @default("") @db.Text
+  size      Int              @default(1)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  sources   ResearchSource[]
+  signals   Signal[]
+
+  @@index([userId])
+  @@index([runId])
+}
+
+/// An interpreted observation about the coverage, traceable to its sources.
+model Signal {
+  id               String        @id @default(cuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runId            String
+  run              ResearchRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
+  clusterId        String?
+  cluster          StoryCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  kind             SignalKind
+  evidenceKind     EvidenceKind  @default(DIRECT)
+  summary          String        @db.Text
+  detail           String        @default("") @db.Text
+  sourceIds        String[]      @default([]) // ResearchSource ids that support this
+  relevanceScore   Int? // 0-100 relevance to the user's knowledge
+  relevanceReasons Json?
+  savedIdeaId      String?       @unique
+  savedIdea        Idea?         @relation(fields: [savedIdeaId], references: [id], onDelete: SetNull)
+  createdAt        DateTime      @default(now())
+
+  @@index([userId])
+  @@index([runId])
+  @@index([clusterId])
+}
+
+/// A content idea, most often saved from a research signal.
+model Idea {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String     @db.Text
+  angle      String     @default("") @db.Text
+  notes      String     @default("") @db.Text
+  sourceUrls String[]   @default([])
+  status     IdeaStatus @default(NEW)
+  origin     String     @default("research") // "research" | "manual"
+  signal     Signal?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, status])
 }

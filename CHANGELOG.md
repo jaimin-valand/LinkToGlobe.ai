@@ -6,6 +6,41 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — research intelligence (Phase 2, first slice)
+
+- **Flow**: `query → ResearchRun → sources → clusters → signals → relevance →
+  opportunity → saved Idea`, all user-owned. `/research`, `/research/[runId]`,
+  `/ideas`, `/ideas/[id]`.
+- **Provider abstraction** (`src/server/research/`): a vendor-neutral
+  `ResearchProvider` interface with a typed error taxonomy. Implementations:
+  - **Tavily** (`RESEARCH_PROVIDER=tavily`)
+  - **Google Programmable Search** (`RESEARCH_PROVIDER=google`, needs
+    `RESEARCH_API_KEY` + `RESEARCH_GOOGLE_CX`)
+  - **fixture** — deterministic placeholder results for dev/E2E, refused in
+    production, clearly labelled in the UI.
+- **Deterministic analysis** — URL canonicalisation + dedupe, story clustering
+  (title token similarity, same-publisher / same-week nudges), heuristic
+  relevance scoring against your `KnowledgeProfile` with a shown breakdown, and
+  signal extraction (`RISING` / `RECURRING` / `UNUSUAL` / `CHANGE` / `GAP`).
+  Every signal keeps the ids of its supporting sources; inferences are marked
+  `INFERENCE`, not passed off as stated fact. No AI in this path.
+- **Idea model** — save a signal's opportunity as an `Idea` (title, angle,
+  notes, source URLs), linked back to the signal.
+- **Prisma** — new models `ResearchRun`, `ResearchSource`, `StoryCluster`,
+  `Signal`, `Idea`; enums `ResearchRunStatus`, `SignalKind`, `EvidenceKind`,
+  `IdeaStatus`; migration `20260907051747_research_intelligence` (additive).
+- **AI providers** — added **Google Gemini** (`AI_PROVIDER=gemini`,
+  `GEMINI_API_KEY`) alongside Anthropic and OpenAI. Same advisory-only contract.
+- Per-user rate limiting on research runs; safe error messages (no provider
+  internals or keys reach the client); provider excerpts rendered as plain
+  text.
+- 68 new unit tests (URL, normalisation, both search providers, Gemini,
+  clustering, relevance, signals, opportunity, provider config, service-layer
+  ownership + persistence + dedupe). New E2E: unauthenticated redirects, and
+  the full fixture-provider flow through to a saved idea.
+- Vitest now runs in the `node` environment (all tests are pure logic) — the
+  suite is ~8× faster.
+
 ### Added — integration boundaries
 
 - `src/server/integrations/` registry: a declaration of every external service

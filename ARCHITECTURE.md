@@ -1,8 +1,8 @@
 # LinkToGlobe.ai — Architecture
 
-Status: **Phase 0 (Foundation).** This document describes the target design.
-Only the parts marked _implemented_ exist today; everything else is a boundary
-we are building toward.
+Status: **Phase 1 (Core MVP) + first slice of Phase 2 (research).** This document
+describes the target design. Only the parts marked _implemented_ exist today;
+everything else is a boundary we are building toward.
 
 ## 1. Goals and constraints
 
@@ -82,22 +82,22 @@ flowchart LR
 
 ## 4. Major modules
 
-| Module                          | Path                        | Responsibility                                 | Status                     |
-| ------------------------------- | --------------------------- | ---------------------------------------------- | -------------------------- |
-| Frontend                        | `src/app`, `src/components` | App Router UI, layout, design system           | implemented                |
-| Config / env                    | `src/lib/env.ts`            | Zod-validated environment, server/client split | implemented                |
-| Pipeline model                  | `src/lib/pipeline.ts`       | Stage + lifecycle definitions                  | implemented                |
-| Database                        | `prisma/`, `src/lib/db.ts`  | Schema, migrations, Prisma client              | implemented                |
-| Auth                            | `src/server/auth`           | scrypt hashing, signed-cookie sessions, guards | implemented                |
-| Knowledge                       | `src/server/knowledge`      | Capture the user's professional context        | implemented                |
-| Content service + state machine | `src/server/content`        | CRUD + server-enforced lifecycle transitions   | implemented                |
-| Quality engine                  | `src/server/quality`        | Deterministic pre-publish checks               | implemented                |
-| AI provider layer               | `src/server/ai`             | One adapter (`manual` / `anthropic`), advisory | implemented                |
-| Analytics                       | `src/server/analytics`      | Real counts, approval rate, activity feed      | Phase-1 subset             |
-| Research / signal engine        | `src/server/research`       | External sources, signal detection             | planned (Phase 2)          |
-| Integrations                    | `src/server/integrations/*` | Publishing destinations behind one interface   | planned (Phase 4)          |
-| Automation                      | `src/server/automation`     | Scheduling, recurring jobs                     | planned (Phase 5)          |
-| Security / audit                | `src/server/*`, ActivityLog | AuthZ per query, append-only lifecycle log     | basic; hardened in Phase 6 |
+| Module                          | Path                        | Responsibility                                                 | Status                     |
+| ------------------------------- | --------------------------- | -------------------------------------------------------------- | -------------------------- |
+| Frontend                        | `src/app`, `src/components` | App Router UI, layout, design system                           | implemented                |
+| Config / env                    | `src/lib/env.ts`            | Zod-validated environment, server/client split                 | implemented                |
+| Pipeline model                  | `src/lib/pipeline.ts`       | Stage + lifecycle definitions                                  | implemented                |
+| Database                        | `prisma/`, `src/lib/db.ts`  | Schema, migrations, Prisma client                              | implemented                |
+| Auth                            | `src/server/auth`           | scrypt hashing, signed-cookie sessions, guards                 | implemented                |
+| Knowledge                       | `src/server/knowledge`      | Capture the user's professional context                        | implemented                |
+| Content service + state machine | `src/server/content`        | CRUD + server-enforced lifecycle transitions                   | implemented                |
+| Quality engine                  | `src/server/quality`        | Deterministic pre-publish checks                               | implemented                |
+| AI provider layer               | `src/server/ai`             | One adapter (`manual`/`anthropic`/`openai`/`gemini`), advisory | implemented                |
+| Analytics                       | `src/server/analytics`      | Real counts, approval rate, activity feed                      | Phase-1 subset             |
+| Research / signal engine        | `src/server/research`       | Provider search, dedupe, clustering, signals, relevance, ideas | Phase-2 first slice        |
+| Integrations                    | `src/server/integrations/*` | Publishing destinations behind one interface                   | planned (Phase 4)          |
+| Automation                      | `src/server/automation`     | Scheduling, recurring jobs                                     | planned (Phase 5)          |
+| Security / audit                | `src/server/*`, ActivityLog | AuthZ per query, append-only lifecycle log                     | basic; hardened in Phase 6 |
 
 ## 5. Data flow (target)
 
@@ -125,10 +125,15 @@ variables only; no client SDK is imported outside its own folder.
   `implemented: false` marks a boundary whose client code is future work.
 - **AI provider** (`src/server/ai/`, _implemented_) — one `AiProvider` interface
   (`suggestIdeas`, `suggestHook`, `expandDraft`, `review`) with `manual`
-  (default, no-op), `anthropic`, and `openai` implementations selected by
-  `AI_PROVIDER`. Output is advisory and never applied without a user action.
-- **Research provider** (_boundary only_) — `RESEARCH_PROVIDER` /
-  `RESEARCH_API_KEY`. Licensed search/news API, no scraping.
+  (default, no-op), `anthropic`, `openai`, and `gemini` implementations selected
+  by `AI_PROVIDER`. Output is advisory and never applied without a user action.
+- **Research provider** (`src/server/research/`, _implemented_) — a
+  vendor-neutral `ResearchProvider` interface with a typed error taxonomy.
+  Adapters: `tavily`, `google` (Programmable Search), and a dev/test `fixture`.
+  The domain layer (dedupe, clustering, signals, relevance) is deterministic and
+  provider-independent. Search runs and the derived analysis are persisted
+  per-user. Licensed APIs only, no scraping. See `src/server/research/README`
+  in the module comments.
 - **Publishing (LinkedIn)** (_boundary only_) — official OAuth + API only.
   A common `Integration` interface (`authorize`, `publish`, `fetchMetrics`,
   `revoke`) lands with the first destination. A post is reported published only

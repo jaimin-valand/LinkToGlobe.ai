@@ -4,6 +4,49 @@ Newest first. Each entry: context, decision, rationale, alternatives, status.
 
 ---
 
+## ADR-0016 — Research provider abstraction; Tavily + Google Programmable Search
+
+- **Context:** Research needs current, citable sources. The domain must not be
+  coupled to one vendor, and the product must never scrape.
+- **Decision:** `src/server/research/` defines a `ResearchProvider` interface
+  (`search(query, options) → normalised sources`) with a typed error taxonomy
+  (`NotConfigured`/`Auth`/`RateLimit`/`Timeout`/`Response`/`Malformed`). Adapters:
+  **Tavily** (`RESEARCH_PROVIDER=tavily`) and **Google Programmable Search /
+  Custom Search JSON API** (`RESEARCH_PROVIDER=google`, `RESEARCH_API_KEY` +
+  `RESEARCH_GOOGLE_CX`). Both are official licensed APIs. `RESEARCH_GOOGLE_CX`
+  is the one provider-specific variable and is genuinely required by Google.
+- **Rationale:** One integration surface; the analysis pipeline never imports a
+  vendor SDK; a new provider is a new file plus one line in `provider.ts`.
+- **Status:** Accepted.
+
+## ADR-0015 — Research analysis is deterministic in this slice
+
+- **Context:** Clustering, signals, and relevance could use AI, but the task
+  requires a testable, reproducible first version and forbids fabricated
+  evidence or claimed understanding the system does not have.
+- **Decision:** Clustering (title-token similarity with same-publisher /
+  same-week nudges), relevance (weighted keyword overlap + a recency bonus that
+  only applies on top of a real content match, with a shown breakdown), and
+  signal extraction (`RISING`/`RECURRING`/`UNUSUAL`/`CHANGE`/`GAP`) are all
+  deterministic pure functions. Every signal records its supporting source ids;
+  a signal that is our own inference across sources is marked `INFERENCE`. AI is
+  not used in the research path. The `getAi()` seam is available for a later
+  advisory enhancement (cluster summaries, angle drafting).
+- **Status:** Accepted; AI-assisted enhancement is a follow-up.
+
+## ADR-0014 — `fixture` research provider for dev and E2E
+
+- **Context:** Authenticated end-to-end tests of the research flow need
+  deterministic provider output, and there is no research API key in CI or dev.
+- **Decision:** A `fixture` provider returns fixed placeholder sources
+  (`example.com`, `[fixture]` titles). `getResearchProvider()` refuses it when
+  `NODE_ENV=production`; the Research page shows a "Fixture provider active,
+  not real research" banner. Playwright's dev webServer sets
+  `RESEARCH_PROVIDER=fixture`.
+- **Rationale:** Real end-to-end coverage of search → clusters → signals →
+  save-as-idea without a key, and no path to it in production.
+- **Status:** Accepted.
+
 ## ADR-0013 — Integration registry declares every external connection
 
 - **Context:** The product will connect to AI, research, LinkedIn, email,
