@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Card } from "@/components/ui/primitives";
+import { STATE_LABELS } from "@/server/content/state";
 import { requireUser } from "@/server/auth";
 import { getIdea, NotFoundError } from "@/server/research";
+import { ConvertToDraftButton } from "./ConvertToDraftButton";
 
 export const metadata: Metadata = { title: "Idea" };
 
@@ -85,13 +87,29 @@ export default async function IdeaPage({ params }: { params: Promise<{ id: strin
         </p>
       )}
 
-      <p className="text-fg-muted text-xs">
-        Turning an idea into a draft is not wired up yet. For now, copy the angle into a{" "}
-        <Link href="/drafts/new" className="text-signal underline underline-offset-2">
-          new draft
-        </Link>
-        .
-      </p>
+      <Card className="flex flex-col gap-3">
+        <div>
+          <p className="text-fg-muted text-xs tracking-wide uppercase">Draft</p>
+          <p className="mt-1 text-sm">
+            {idea.draft
+              ? "This idea already has a draft."
+              : "Start a draft from this idea. The angle becomes the hook and the sources carry across; you write the body."}
+          </p>
+        </div>
+        {idea.draft ? (
+          <p className="text-sm">
+            <Link
+              href={`/drafts/${idea.draft.id}`}
+              className="text-signal underline underline-offset-2"
+            >
+              Open the draft
+            </Link>
+            <span className="text-fg-muted"> · {STATE_LABELS[idea.draft.state]}</span>
+          </p>
+        ) : (
+          <ConvertToDraftButton ideaId={idea.id} />
+        )}
+      </Card>
     </div>
   );
 }

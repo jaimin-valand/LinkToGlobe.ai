@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/primitives";
 import { StateBadge } from "@/components/content/StateBadge";
@@ -39,6 +40,17 @@ export default async function DraftPage({ params }: { params: Promise<{ id: stri
           <div className="mt-2">
             <StateBadge state={draft.state} />
           </div>
+          {draft.originIdea && (
+            <p className="text-fg-muted mt-2 text-xs">
+              From idea{" "}
+              <Link
+                href={`/ideas/${draft.originIdea.id}`}
+                className="text-signal underline underline-offset-2"
+              >
+                {draft.originIdea.title}
+              </Link>
+            </p>
+          )}
         </div>
         {draft.state !== "PUBLISHED" && <DeleteDraftButton id={draft.id} title={draft.title} />}
       </div>

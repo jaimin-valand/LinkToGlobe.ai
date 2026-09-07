@@ -101,6 +101,8 @@ model ContentDraft {
   sourceNotes     String          @default("") @db.Text
   state           ContentState    @default(DRAFT)
   rejectionReason String?         @db.Text
+  originIdeaId    String?         @unique
+  originIdea      Idea?           @relation(fields: [originIdeaId], references: [id], onDelete: SetNull)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   submittedAt     DateTime?
@@ -258,6 +260,7 @@ model Idea {
   status     IdeaStatus @default(NEW)
   origin     String     @default("research") // "research" | "manual"
   signal     Signal?
+  draft      ContentDraft? // set when the idea has been turned into a draft
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 

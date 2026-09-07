@@ -34,7 +34,10 @@ export function listDrafts(userId: string, state?: ContentState) {
 export async function getDraftWithReports(userId: string, id: string) {
   const draft = await prisma.contentDraft.findFirst({
     where: { id, userId },
-    include: { qualityReports: { orderBy: { createdAt: "desc" }, take: 5 } },
+    include: {
+      qualityReports: { orderBy: { createdAt: "desc" }, take: 5 },
+      originIdea: { select: { id: true, title: true } },
+    },
   });
   if (!draft) throw new NotFoundError("Draft not found.");
   return draft;
@@ -47,6 +50,53 @@ export async function createDraft(userId: string, title: string): Promise<Conten
     const draft = await tx.contentDraft.create({ data: { userId, title: clean } });
     await log(tx, userId, draft.id, "draft.created", { title: clean });
     return draft;
+  });
+}
+
+/** Notes carried onto a draft from the idea it came from. */
+function ideaSourceNotes(idea: { notes: string; sourceUrls: string[] }): string {
+  const parts: string[] = [];
+  const notes = idea.notes.trim();
+  if (notes) parts.push(notes);
+  if (idea.sourceUrls.length > 0) {
+    parts.push(["Sources", ...idea.sourceUrls.map((url) => `- ${url}`)].join("\n"));
+  }
+  return parts.join("\n\n").slice(0, 50_000);
+}
+
+/**
+ * Start a draft from a saved idea. The draft opens in DRAFT with the idea's
+ * angle as the hook and its sources in the notes; the body is left for the user
+ * to write. Idempotent: an idea already has at most one draft (unique
+ * `originIdeaId`), and a second call returns that draft.
+ */
+export async function createDraftFromIdea(
+  userId: string,
+  ideaId: string,
+): Promise<{ draftId: string; alreadyExisted: boolean }> {
+  const idea = await prisma.idea.findFirst({
+    where: { id: ideaId, userId },
+    include: { draft: { select: { id: true } } },
+  });
+  if (!idea) throw new NotFoundError("Idea not found.");
+  if (idea.draft) return { draftId: idea.draft.id, alreadyExisted: true };
+
+  const title = idea.title.trim().slice(0, 200) || "Untitled draft";
+  const hook = idea.angle.trim().slice(0, 2000);
+  const sourceNotes = ideaSourceNotes(idea);
+
+  return prisma.$transaction(async (tx) => {
+    const draft = await tx.contentDraft.create({
+      data: { userId, title, hook, sourceNotes, originIdeaId: idea.id },
+    });
+    if (idea.status === "NEW") {
+      await tx.idea.update({ where: { id: idea.id }, data: { status: "IN_PROGRESS" } });
+    }
+    await log(tx, userId, draft.id, "draft.created", { title, fromIdeaId: idea.id });
+    await tx.activityLog.create({
+      data: { userId, action: "idea.converted", detail: { ideaId: idea.id, draftId: draft.id } },
+    });
+    return { draftId: draft.id, alreadyExisted: false };
   });
 }
 
