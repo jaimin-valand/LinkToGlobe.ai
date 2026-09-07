@@ -1,0 +1,26 @@
+# Local PostgreSQL for development.
+#   docker compose up -d     # start
+#   docker compose down      # stop (keeps data)
+#   docker compose down -v   # stop and wipe data
+#
+# Matches the default DATABASE_URL in .env.example.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: linktoglobe
+      POSTGRES_PASSWORD: linktoglobe
+      POSTGRES_DB: linktoglobe
+    ports:
+      - "5432:5432"
+    volumes:
+      - linktoglobe_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linktoglobe -d linktoglobe"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  linktoglobe_pgdata:

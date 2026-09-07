@@ -1,0 +1,108 @@
+// LinkToGlobe data model.
+//
+// The content lifecycle (DRAFT -> QUALITY_CHECK -> USER_APPROVAL -> PUBLISHED,
+// with REJECTED as an off-ramp) is enforced in code by src/server/content/state.ts
+// and mirrors APPROVAL_LIFECYCLE in src/lib/pipeline.ts.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  EDITOR
+}
+
+/// Where a piece of content sits in the publishing lifecycle.
+enum ContentState {
+  DRAFT
+  QUALITY_CHECK
+  USER_APPROVAL
+  PUBLISHED
+  REJECTED
+}
+
+model User {
+  id           String            @id @default(cuid())
+  email        String            @unique
+  passwordHash String
+  name         String?
+  role         UserRole          @default(OWNER)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  knowledge    KnowledgeProfile?
+  drafts       ContentDraft[]
+  activity     ActivityLog[]
+}
+
+/// The user's professional context — the "USER KNOWLEDGE" pipeline stage.
+model KnowledgeProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline  String   @default("")
+  expertise String   @default("") @db.Text
+  audience  String   @default("")
+  tone      String   @default("")
+  topics    String[] @default([])
+  sources   String   @default("") @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A single unit of content moving through the pipeline.
+model ContentDraft {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  hook            String          @default("") @db.Text
+  body            String          @default("") @db.Text
+  sourceNotes     String          @default("") @db.Text
+  state           ContentState    @default(DRAFT)
+  rejectionReason String?         @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  submittedAt     DateTime?
+  approvedAt      DateTime?
+  publishedAt     DateTime?
+  qualityReports  QualityReport[]
+  activity        ActivityLog[]
+
+  @@index([userId])
+  @@index([state])
+}
+
+/// Result of running the quality engine against a draft.
+model QualityReport {
+  id        String       @id @default(cuid())
+  draftId   String
+  draft     ContentDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  passed    Boolean
+  score     Int
+  checks    Json
+  createdAt DateTime     @default(now())
+
+  @@index([draftId])
+}
+
+/// Append-only audit trail for lifecycle actions (see SECURITY.md).
+model ActivityLog {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  draftId   String?
+  draft     ContentDraft? @relation(fields: [draftId], references: [id], onDelete: SetNull)
+  action    String
+  detail    Json?
+  createdAt DateTime      @default(now())
+
+  @@index([draftId])
+  @@index([userId])
+}
