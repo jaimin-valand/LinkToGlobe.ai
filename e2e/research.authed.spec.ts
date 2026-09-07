@@ -39,12 +39,33 @@ test("fixture provider results can be produced, explained, and saved as an idea"
   await expect(page).toHaveURL(/\/ideas\/\w+$/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByText("Suggested angle")).toBeVisible();
-
-  // The idea can be turned into a draft, which opens in Draft with a link back.
   const ideaUrl = page.url();
+
+  // Hook Lab: with no AI key the manual path is available; a candidate is
+  // scored and can be selected for the draft.
+  const HOOK = "Why do we still page a human for what a script could catch first?";
+  await page.getByRole("link", { name: /Hook Lab/ }).click();
+  await expect(page).toHaveURL(/\/hooks\/\w+$/, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Hook Lab" })).toBeVisible();
+  await expect(page.getByText("AI generation is off")).toBeVisible();
+
+  await page.getByLabel("Write your own").fill(HOOK);
+  await page.getByRole("button", { name: "Add candidate" }).click();
+
+  const card = page.getByRole("listitem").filter({ hasText: HOOK });
+  await expect(card).toBeVisible();
+  await expect(card.getByText("Question")).toBeVisible(); // classified strategy
+  await expect(card.getByText(/Relevance/)).toBeVisible();
+  await card.getByRole("button", { name: "Use this hook" }).click();
+  await expect(page.getByRole("region", { name: "Selected hook" })).toContainText(HOOK);
+
+  // Back on the idea, the chosen hook shows and carries into the draft.
+  await page.goto(ideaUrl);
+  await expect(page.locator("p", { hasText: HOOK })).toBeVisible();
   await page.getByRole("button", { name: "Turn into draft" }).click();
   await expect(page).toHaveURL(/\/drafts\/\w+$/, { timeout: 30_000 });
   await expect(page.getByText("Draft", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Hook", { exact: true })).toHaveValue(HOOK);
   const provenance = page.locator("p", { hasText: "From idea" });
   await expect(provenance).toBeVisible();
 
@@ -53,6 +74,15 @@ test("fixture provider results can be produced, explained, and saved as an idea"
   await expect(page).toHaveURL(ideaUrl, { timeout: 30_000 });
   await expect(page.getByRole("link", { name: "Open the draft" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Turn into draft" })).toHaveCount(0);
+
+  // The lab now appears on the Hooks index with its chosen hook.
+  const ideaId = ideaUrl.split("/").pop();
+  await page.goto("/hooks");
+  await expect(page.getByRole("heading", { name: "Hooks", exact: true })).toBeVisible();
+  const labRow = page
+    .getByRole("listitem")
+    .filter({ has: page.locator(`a[href="/hooks/${ideaId}"]`) });
+  await expect(labRow).toContainText("Hook chosen");
 });
 
 test("an over-short query does not start a run", async ({ page }) => {

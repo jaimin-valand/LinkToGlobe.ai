@@ -65,10 +65,11 @@ function ideaSourceNotes(idea: { notes: string; sourceUrls: string[] }): string 
 }
 
 /**
- * Start a draft from a saved idea. The draft opens in DRAFT with the idea's
- * angle as the hook and its sources in the notes; the body is left for the user
- * to write. Idempotent: an idea already has at most one draft (unique
- * `originIdeaId`), and a second call returns that draft.
+ * Start a draft from a saved idea. The draft opens in DRAFT with the selected
+ * Hook Lab hook (or the idea's angle if none is selected) as the hook, and the
+ * idea's sources in the notes; the body is left for the user to write.
+ * Idempotent: an idea already has at most one draft (unique `originIdeaId`), and
+ * a second call returns that draft.
  */
 export async function createDraftFromIdea(
   userId: string,
@@ -76,13 +77,17 @@ export async function createDraftFromIdea(
 ): Promise<{ draftId: string; alreadyExisted: boolean }> {
   const idea = await prisma.idea.findFirst({
     where: { id: ideaId, userId },
-    include: { draft: { select: { id: true } } },
+    include: {
+      draft: { select: { id: true } },
+      hookLab: { select: { selectedCandidate: { select: { text: true } } } },
+    },
   });
   if (!idea) throw new NotFoundError("Idea not found.");
   if (idea.draft) return { draftId: idea.draft.id, alreadyExisted: true };
 
   const title = idea.title.trim().slice(0, 200) || "Untitled draft";
-  const hook = idea.angle.trim().slice(0, 2000);
+  const selectedHook = idea.hookLab?.selectedCandidate?.text?.trim();
+  const hook = (selectedHook || idea.angle.trim()).slice(0, 2000);
   const sourceNotes = ideaSourceNotes(idea);
 
   return prisma.$transaction(async (tx) => {

@@ -388,6 +388,12 @@ export async function getIdea(userId: string, id: string) {
     include: {
       signal: { select: { id: true, runId: true } },
       draft: { select: { id: true, state: true } },
+      hookLab: {
+        select: {
+          _count: { select: { candidates: true } },
+          selectedCandidate: { select: { text: true, strategy: true } },
+        },
+      },
     },
   });
   if (!idea) throw new NotFoundError("Idea not found.");

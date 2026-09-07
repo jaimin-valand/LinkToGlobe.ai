@@ -44,6 +44,11 @@ integration without the security review in `SECURITY.md` §6–7.
   (dedupe, clustering, relevance, signals) is deterministic and provider-neutral;
   vendor code stays in `providers/`. Never fabricate sources, citations, or
   facts; never scrape. A signal that is an inference is marked `INFERENCE`.
+- **Hook Lab.** `src/server/hooks/` — AI drafts hook options (advisory, via the
+  `AiProvider` seam, constrained to the idea's material); all scoring (strategy,
+  relevance, clarity, differentiation) is deterministic and testable. A figure
+  not present in the idea's notes is flagged, never hidden. The manual path must
+  keep working with no AI configured.
 - **Integrations are declared, then built.** `src/server/integrations/registry.ts`
   lists every external connection with its required env vars. Adding a provider
   is a new folder plus a registry line. Every integration is optional; an

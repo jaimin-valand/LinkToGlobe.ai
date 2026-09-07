@@ -6,4 +6,7 @@ test("research and ideas require sign in", async ({ page }) => {
 
   await page.goto("/ideas");
   await expect(page).toHaveURL(/\/login\?next=%2Fideas/);
+
+  await page.goto("/hooks");
+  await expect(page).toHaveURL(/\/login\?next=%2Fhooks/);
 });

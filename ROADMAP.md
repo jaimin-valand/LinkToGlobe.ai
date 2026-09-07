@@ -46,6 +46,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` complete
   - [ ] AI-assisted cluster summaries / angles (seam exists; deterministic today)
   - [ ] Signal history / re-run comparison, saved searches
   - [x] Turn an `Idea` directly into a `ContentDraft`
+- [x] Hook Lab: generate / compare / score / select an opening line, into the draft
 - [ ] Originality / plagiarism checks
 - [ ] Policy-fit checks per destination
 

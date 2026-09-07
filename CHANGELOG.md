@@ -6,6 +6,40 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added — Hook Lab
+
+- **The hook-generation stage of the pipeline.** `Idea → Hook Lab → selected hook
+  → Draft`. New routes `/hooks` (index) and `/hooks/[id]` (workspace, `[id]` is
+  the idea id). "Hooks" sits between Ideas and Drafts in the nav.
+- **Candidates.** Generate a set with the configured AI provider, or write your
+  own. Either way each candidate is scored the same way. The app works with no
+  AI configured — the manual path is always available.
+- **Deterministic scoring** (`src/server/hooks/`, no AI): a strategy label
+  (`QUESTION` / `CONTRARIAN` / `STORY` / `STAT` / `HOWTO` / `DIRECT`) from the
+  line's shape; relevance to the idea (content-word overlap, shown); a clarity
+  score (sentence length, long words, filler, hedging, jargon) with notes; and
+  how different each candidate is from the others in the lab. Warnings flag a
+  figure that is not in the idea's notes, an over-long line, more than two
+  sentences, or placeholder text.
+- **AI is advisory.** A new `draftHooks` method on the provider interface
+  (Anthropic / OpenAI / Gemini; the manual provider returns disabled). The
+  prompt is constrained to the idea's own material and told never to invent
+  figures, names, quotes, dates, or events. Generation is deduped, capped per
+  lab, and lightly rate-limited.
+- **Select a hook** and it is stored on the lab. Turning the idea into a draft
+  then uses the selected hook instead of the raw angle; if a draft already
+  exists and is still in `DRAFT`, its hook is updated in place.
+- **Prisma** — migration `20260907140000_hook_lab`: new `HookLab` and
+  `HookCandidate` tables, enums `HookStrategy` and `HookSource`. Additive; every
+  row is user-owned; existing tables untouched.
+- Activity log gains `hooklab.generated` / `hooklab.candidate_added` /
+  `hooklab.candidate_removed` / `hooklab.selected`.
+- 49 new unit tests (strategy classifier, clarity, relevance, differentiation,
+  evaluation, Gemini `draftHooks`, and the service with mocked Prisma + AI:
+  generation, dedupe, cooldown, ownership, manual add, selection into a draft).
+  The fixture-provider E2E now runs the whole pipeline: research → idea → Hook
+  Lab (manual candidate, scored, selected) → draft with that hook.
+
 ### Added — idea to draft
 
 - **Turn an idea into a draft.** The `/ideas/[id]` page has a "Turn into draft"
