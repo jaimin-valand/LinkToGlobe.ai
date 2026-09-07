@@ -48,6 +48,42 @@ describe("gemini provider", () => {
     expect((init?.headers as Record<string, string>)["x-goog-api-key"]).toBe("gk");
   });
 
+  it("draftHooks parses the lines and never invents an API URL key", async () => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Response>(
+      () =>
+        new Response(
+          JSON.stringify({
+            candidates: [
+              { content: { parts: [{ text: "Hook one?\n- Hook two\n3. Hook three" }] } },
+            ],
+          }),
+          { status: 200 },
+        ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const r = await provider().draftHooks({
+      idea: "On-call rotations",
+      angle: "five years of data",
+      notes: "pages dropped 40%",
+      knowledge,
+    });
+    expect(r.ok).toBe(true);
+    expect(r.data).toEqual(["Hook one?", "Hook two", "Hook three"]);
+    expect(String(fetchMock.mock.calls[0][0])).not.toContain("gk");
+  });
+
+  it("draftHooks returns an error result on a non-2xx response", async () => {
+    mockFetch(() => new Response("rate limited", { status: 429 }));
+    const r = await provider().draftHooks({
+      idea: "x",
+      angle: "",
+      notes: "",
+      knowledge,
+    });
+    expect(r.ok).toBe(false);
+    expect(r.error).toContain("429");
+  });
+
   it("review distinguishes warnings from info", async () => {
     mockFetch(
       () =>

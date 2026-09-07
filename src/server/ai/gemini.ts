@@ -100,6 +100,15 @@ export function createGeminiProvider(config: GeminiConfig): AiProvider {
       return r.ok ? { ok: true, data: parseLines(r.data ?? "") } : { ok: false, error: r.error };
     },
 
+    async draftHooks(ctx): Promise<AiResult<string[]>> {
+      const r = await call(
+        config,
+        "You write opening lines (hooks) for a professional's post. Reply with 6 options, one per line, no numbering, no preamble, no commentary. Vary the approach across the six: a pointed question; a contrarian take; a first-person or mid-scene opener; a line built on a figure that appears in the material; a 'how to' framing; a plain statement of the takeaway. Use only facts present in the material provided. Never invent statistics, names, quotes, dates, companies, or events. Keep each to one sentence.",
+        `Context:\n${knowledgeBlock(ctx.knowledge)}\n\nIdea: ${ctx.idea}\nAngle: ${ctx.angle || "(none)"}\nMaterial / notes:\n${ctx.notes || "(none)"}\n\nWrite 6 opening lines.`,
+      );
+      return r.ok ? { ok: true, data: parseLines(r.data ?? "") } : { ok: false, error: r.error };
+    },
+
     async expandDraft(ctx): Promise<AiResult<string>> {
       return call(
         config,

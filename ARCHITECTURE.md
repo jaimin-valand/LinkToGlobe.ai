@@ -95,6 +95,7 @@ flowchart LR
 | AI provider layer               | `src/server/ai`             | One adapter (`manual`/`anthropic`/`openai`/`gemini`), advisory | implemented                |
 | Analytics                       | `src/server/analytics`      | Real counts, approval rate, activity feed                      | Phase-1 subset             |
 | Research / signal engine        | `src/server/research`       | Provider search, dedupe, clustering, signals, relevance, ideas | Phase-2 first slice        |
+| Hook Lab                        | `src/server/hooks`          | AI hook drafting (advisory) + deterministic scoring, selection | Phase-2                    |
 | Integrations                    | `src/server/integrations/*` | Publishing destinations behind one interface                   | planned (Phase 4)          |
 | Automation                      | `src/server/automation`     | Scheduling, recurring jobs                                     | planned (Phase 5)          |
 | Security / audit                | `src/server/*`, ActivityLog | AuthZ per query, append-only lifecycle log                     | basic; hardened in Phase 6 |

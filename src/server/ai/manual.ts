@@ -18,6 +18,9 @@ export const manualProvider: AiProvider = {
   async suggestHook() {
     return disabled<string[]>();
   },
+  async draftHooks() {
+    return disabled<string[]>();
+  },
   async expandDraft() {
     return disabled<string>();
   },

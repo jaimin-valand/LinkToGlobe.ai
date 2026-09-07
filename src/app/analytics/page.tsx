@@ -22,6 +22,10 @@ const ACTION_LABELS: Record<string, string> = {
   "research.completed": "Research run completed",
   "idea.saved": "Idea saved",
   "idea.converted": "Idea turned into draft",
+  "hooklab.generated": "Hook candidates generated",
+  "hooklab.candidate_added": "Hook candidate added",
+  "hooklab.candidate_removed": "Hook candidate removed",
+  "hooklab.selected": "Hook selected",
 };
 
 function Stat({ label, value }: { label: string; value: string }) {

@@ -4,6 +4,28 @@ Newest first. Each entry: context, decision, rationale, alternatives, status.
 
 ---
 
+## ADR-0018 — Hook Lab: AI drafts, deterministic code judges
+
+- **Context:** The pipeline needs a hook-generation stage. Generating varied
+  opening lines is a good fit for a language model; judging them must be
+  testable and must never launder an invented fact into the draft.
+- **Decision:** `src/server/hooks/` splits the two. Generation is one advisory
+  `AiProvider.draftHooks` call, constrained to the idea's own material. Scoring
+  is deterministic pure functions — strategy classification from surface shape,
+  relevance by content-word overlap with the idea, a clarity index over a few
+  concrete signals, and pairwise differentiation across the lab. A candidate
+  that contains a figure absent from the idea's notes is flagged, not hidden.
+  Scores are frozen on insert; differentiation is recomputed on read because it
+  depends on the whole set. The manual path (write your own candidate, same
+  scoring) always works, so Hook Lab is usable with no AI configured.
+- **Rationale:** Mirrors ADR-0015 (research analysis is deterministic). The
+  model helps with wording; the numbers a user sees are reproducible and
+  covered by tests.
+- **Alternatives:** Ask the model to also score and rank (rejected — not
+  reproducible, and it would be judging its own output); a fixed template
+  generator with no AI (weak variety, and the seam already exists).
+- **Status:** Accepted.
+
 ## ADR-0017 — Idea → draft is a one-way seed, not a live link
 
 - **Context:** Research produces `Idea`s; the content pipeline starts at a
